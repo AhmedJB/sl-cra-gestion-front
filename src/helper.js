@@ -3,7 +3,7 @@ import axios from 'axios';
 
 
 
-const base_url = "http://apphost:8000"
+const base_url = "http://85.31.236.214/gestionapp"
 const api = base_url + '/api/'
 
 //var fileDownload = require('js-file-download');
