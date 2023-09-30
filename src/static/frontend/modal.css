@@ -1,0 +1,168 @@
+:root{
+    --text : #9DB5B2;
+    /* --second : #FAA381; */
+    --second : #5900ff;
+
+    --black : #09090c;
+    --grey : #a4b2bc;
+    --white : #fff;
+    --background : #d2e0fd;
+    --purple : #b187ff;
+    --bg : #171717;
+}
+
+.modal-backdrop {
+    position: fixed;
+    height: 100vh;
+    width: 100vw;
+    top: 0;
+    left: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 99;
+  }
+
+  .input-field {
+    padding:5px;
+    outline:none;
+    width:280px;
+    background:transparent;
+    border-radius: 8px;
+    font-size:1em;
+    border:1px solid var(--text);
+    filter:brightness(1);
+    color:var(--text) !important;
+    transition: filter .2s linear;
+}
+
+.editable-field{
+  padding:5px;
+  border-radius:5px;
+  background-color: transparent;
+  font-size:1em;
+  font-weight: 600;
+  outline: none;
+  border:1px solid var(--text);
+  color:var(--purple)
+
+}
+
+.modal-content{
+  background-color: transparent !important;
+  border:none !important;
+}
+
+  .title-modal{
+        color:var(--purple);
+        text-align:center;
+        letter-spacing: 3px;
+        font-size: 1.8em;
+        font-weight: 600;
+  }
+  
+  .modal-content-wrapper {
+    position: fixed;
+    background: var(--bg);
+    box-shadow: 0px 0px 20px var(--black);
+    margin: 0 auto;
+    top: 50%;
+    left:50%;
+    transform: translate(-50%,-50%) !important;
+    /* top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0; */
+
+    max-height: 80vh;
+    width:auto; 
+    max-width: 95%;
+
+    overflow-y: auto;
+    padding: 50px;
+    z-index: 100;
+    border-radius: 10px;
+  }
+
+
+  .modal-input{
+    display:flex;
+    flex-direction: column;
+    align-items: center;
+
+}
+.modal-input-row{
+  display:flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  align-items: center;
+
+}
+
+.modal-input label:not(.MuiInputLabel-root){
+    font-size:.8em;
+    color:var(--text);
+    letter-spacing:2px;
+    font-weight:700;
+    margin:20px;
+    
+}
+
+.modal-input .input-wrapper{
+  display:flex;
+  flex-direction: column;
+  align-items: center;
+  margin:0px 10px 0px 0px;
+}
+
+.modal-input input:not(.CustomDropdown input):not(.MuiInput-input){
+    padding:5px;
+    outline:none;
+    width:280px;
+    background:transparent;
+    border-radius: 8px;
+    font-size:1em;
+    border:1px solid var(--text);
+    filter:brightness(.6);
+    color:var(--text);
+    transition: filter .2s linear;
+}
+
+.modal-input input[type="number"]:not(.CustomDropdown input) ,#achat ,#vente{
+  padding:5px;
+  outline:none;
+  background:transparent;
+  border-radius: 8px;
+  font-size:1em;
+  border:1px solid var(--text);
+  filter:brightness(.6);
+  color:var(--text);
+  transition: filter .2s linear;
+  
+  width:140px;
+}
+
+.modal-input select{
+  padding:5px;
+  outline:none;
+  
+  background:transparent;
+  border-radius: 8px;
+  font-size:1em;
+  border:1px solid var(--text);
+  filter:brightness(.6);
+  color:var(--text);
+  transition: filter .2s linear;
+  width:140px;
+}
+
+.m20{
+  margin-bottom: 30px;
+}
+
+.modal-input input:hover{
+    filter: brightness(1);
+}
+
+.modalSubmit{
+ margin:40px 0px 0px 20px !important;
+}
+  

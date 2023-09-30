@@ -1,0 +1,25 @@
+FROM node:18 AS base
+
+
+RUN DEBIAN_FRONTEND=noninteractive apt-get install  libc6
+
+
+WORKDIR /app
+
+ENV NODE_ENV production
+# Uncomment the following line in case you want to disable telemetry during runtime.
+ENV NEXT_TELEMETRY_DISABLED 1
+
+COPY ./build ./build
+
+#RUN npm install -g --legacy-peer-deps
+
+
+#RUN npm run build
+RUN npm install -g serve
+
+
+EXPOSE 3000
+
+
+CMD ["serve","-s", "build"]

@@ -1,0 +1,325 @@
+:root {
+    --body-bg: rgb(204, 204, 204);
+    --white: #ffffff;
+    --darkWhite: rgb(80, 80, 80);
+    --black: #000000;
+    --dark: #615c60;
+    --themeColor: #303030;
+    --pageShadow: 0 0 0.5cm rgba(0, 0, 0, 0.5);
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600&display=swap');
+
+
+#exportPdf{
+    display: none;
+}
+.page {
+    background: transparent;
+    display: block;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+    width: 21cm;
+    height: 31.5cm;
+    overflow: hidden;
+    padding:.5cm  .5cm 0px .5cm;
+    color: #101010;
+    
+    
+}
+
+
+
+
+#bon-title{
+    margin:0.4cm 0.4cm 0.4cm 10px;
+    font-weight: 150;
+
+}
+
+.p-5{
+    padding:2rem !important;
+}
+#watermark{
+    position: absolute;
+    top: 50%;
+    left:50%;
+    transform: translate(-50%,-50%);
+    z-index:-1;
+    opacity: .4;
+}
+
+/* .imgfluid{
+    max-width: 55%;
+
+} */
+
+.page[size="A4"] {
+    width: 21cm;
+    height: 29.6cm;
+    padding-bottom: 5px;
+    overflow: hidden;
+}
+
+.bb {
+    border-bottom: 3px solid var(--darkWhite);
+}
+.row-custom{
+    width:19.6cm;
+    display:flex;
+    align-items: center;
+    justify-content: space-between;
+    margin:0px;
+}
+
+#client{
+    text-transform: capitalize;
+}
+
+.row-custom h2{
+    font-size:1.7em;
+}
+
+/* Top Section */
+.top-content {
+    padding-bottom: 15px;
+}
+
+.logo-facture img {
+    height: 80px;
+}
+
+.top-left p {
+    margin: 0;
+}
+.center-elem{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.center-elem p{
+    font-size:1.5em;
+}
+.center-elem p span{
+    color:var(--themeColor);
+}
+
+.top-left .graphic-path {
+    height: 40px;
+    width:60px;
+    position: relative;
+}
+
+.top-left .graphic-path::before {
+    content: "";
+    height: 20px;
+    background-color: var(--dark);
+    position: absolute;
+    left: 15px;
+    right: 0;
+    top: -15px;
+    z-index: 2;
+}
+
+.top-left .graphic-path::after {
+    content: "";
+    height: 22px;
+    width: 17px;
+    background: var(--black);
+    position: absolute;
+    top: -13px;
+    left: 6px;
+    transform: rotate(45deg);
+}
+
+.top-left .graphic-path p {
+    color: var(--white);
+    
+    left: 0;
+    right: -100px;
+    text-transform: uppercase;
+    background-color: var(--themeColor);
+    font: 26px;
+    z-index: 3;
+    position: absolute;
+    padding:10px 0px;
+    padding-left: 10px;
+}
+
+/* User Store Section */
+.store-user {
+    padding-bottom: 25px;
+}
+
+.store-user p {
+    margin: 0;
+    font-weight: 500;
+}
+
+.store-user .address {
+    font-weight: 400;
+}
+
+.store-user h2 {
+    color: var(--themeColor);
+    font-family: 'Rajdhani', sans-serif;
+}
+
+.extra-info p span {
+    font-weight: 400;
+}
+
+/* Product Section */
+
+.product-area{
+    margin:0px !important;
+}
+#fact-table thead {
+    color: var(--white);
+    background: var(--themeColor);
+}
+
+#fact-table td,
+#fact-table  th {
+    text-align: center;
+    vertical-align: middle;
+}
+
+#fact-table  tr td:last-child{
+    text-align: right !important;
+}
+
+#fact-table  tr th:nth-child(2),
+#fact-table  tr td:nth-child(2) {
+    text-align: left;
+}
+
+.media img {
+    height: 60px;
+    width: 60px;
+}
+
+.media p {
+    font-weight: 400;
+    margin: 0;
+}
+
+.media p.title {
+    font-weight: 600;
+}
+.note span{
+    font-weight:400;
+}
+
+/* Balance Info Section */
+.balance-info #fact-table  td,
+.balance-info #fact-table  th {
+    padding: 0;
+    border: 0;
+}
+
+.balance-info tr td:first-child {
+    font-weight: 600;
+}
+
+.total tr td:nth-child(1){
+    text-align: left;
+}
+.total tr td:nth-child(2){
+    text-align: right;
+    padding:0px 14px 0px 0px;
+}
+
+#fact-table  td  sup{
+    font-size:.7em;
+    font-weight: 600;
+}
+
+#fact-table  tfoot {
+    border-top: 2px solid var(--darkWhite);
+}
+
+#fact-table  tfoot td {
+    font-weight: 600;
+    padding:2px !important;
+    
+    
+}
+
+#fact-table  tfoot tr td:last-child{
+    padding: 2px .75rem !important;
+}
+
+
+
+
+.bord{
+    border-top:1px solid var(--darkWhite) !important;
+}
+#fact-table  tfoot td{
+    border:none !important;
+}
+
+
+/* Cart BG */
+.cart-bg {
+    height: 150px;
+    bottom: 36px;
+    left: -20px;
+    opacity: 0.3;
+    position: absolute;
+}
+
+/* #footer-facture Section */
+#footer-facture {
+    text-align: center;
+    position: absolute;
+    bottom:.5cm;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+#footer-facture hr {
+    margin-bottom: -22px;
+    border-top: 3px solid var(--darkWhite);
+}
+
+#footer-facture a {
+    color: var(--themeColor);
+}
+
+#footer-facture p {
+    padding: 6px;
+    border: 3px solid var(--darkWhite);
+    background-color: var(--white);
+    display: inline-block;
+}
+
+
+#footer-facture .social{
+    width:21cm;
+/*     padding-top: 3px; */
+    display:flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    font-weight: 600;
+    color: black;
+}
+
+#footer-facture  .email{
+    padding:15px;
+    margin:0px;
+    font-size:1em;
+    font-weight: 600;
+    color: black;
+}
+
+
+.colortext{
+    color: black;
+    font-weight: 600;
+}
+

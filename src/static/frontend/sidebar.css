@@ -1,0 +1,167 @@
+/* @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&display=swap'); */
+
+:root{
+  --text : #9DB5B2;
+  /* --second : #FAA381; */
+  --second : #5900ff;
+
+  --black : #09090c;
+  --grey : #a4b2bc;
+  --white : #fff;
+  --background : #d2e0fd;
+  --purple : #b187ff;
+}
+
+
+nav#sidebar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 300px;
+  min-height: 100vh;
+  height:100vh;
+  background: var(--black);
+  background: -webkit-linear-gradient(bottom right, #000000, #282828);
+    background: -moz-linear-gradient(bottom right, #000000, #282828);
+    background: linear-gradient(to top left, #000000, #282828);
+  
+  
+}
+
+nav#sidebar  .background{
+  min-height: 100vh;
+  height:100%;
+}
+
+nav.overflow{
+  overflow-y:auto;
+  overflow-x: hidden;
+}
+
+nav#sidebar.open{
+  z-index:1000;
+
+}
+
+nav#sidebar.closed{
+  z-index:0;
+}
+
+.background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 300px;
+  height:100%;
+  background: var(--black);
+  background: -webkit-linear-gradient(bottom right, #000000, #282828);
+    background: -moz-linear-gradient(bottom right, #000000, #282828);
+    background: linear-gradient(to top left, #000000, #282828);
+
+  box-shadow: 0px 5px 20px var(--black);
+}
+
+#sidebar button {
+  outline: none;
+  border: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  cursor: pointer;
+  position: absolute;
+  top: 18px;
+  left: 15px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: transparent;
+}
+
+#sidebar ul,
+#sidebar li {
+  margin: 0;
+  padding: 0;
+}
+
+#sidebar ul {
+  padding: 0px 25px;
+  position: absolute;
+  /* top: 100px; */
+  width: 100%;
+}
+
+
+#sidebar li{
+  list-style: none;
+}
+#sidebar li a {
+  
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+
+#sidebar .icon-placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex: 40px 0;
+  margin-right: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size:1.1em;
+}
+
+#sidebar .text-placeholder {
+  border-radius: 5px;
+  width: 300px;
+  flex: 1;
+  font-family: 'Montserrat', sans-serif;
+  font-size:1em;
+  font-weight: 600;
+}
+
+#sidebar .refresh {
+  padding: 10px;
+  position: absolute;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 10px;
+  width: 20px;
+  height: 20px;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.logo{
+  margin:50px 0px;
+  width:100%;
+
+}
+
+#layer{
+  position:absolute;
+  top:0;
+  left: 0;
+  min-height: 100vh;
+  height: 100%;
+  width:100vw;
+  background:#1111119b;
+}
+
+@media  (max-width:500px) {
+  .logo{
+    margin:20px 0px;
+    width:100%;
+  
+  }
+  
+}
