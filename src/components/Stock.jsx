@@ -29,7 +29,7 @@ import {
   faWarehouse,
   faPlus,
   faSearch,
-  faUpload
+  faUpload,
 } from "@fortawesome/free-solid-svg-icons";
 import CustomSelect from "./CustomSelect";
 import Checkbox from "@mui/material/Checkbox";
@@ -229,17 +229,18 @@ function Stock(props) {
     }
   }, [Products]);
 
-
   useEffect(() => {
     if (selectedProductImage) {
-      let prod = Products.filter(e => e.product.id === selectedProductImage.product.id)
+      let prod = Products.filter(
+        (e) => e.product.id === selectedProductImage.product.id
+      );
       if (prod.length > 0) {
-        setSelectedProductImage(prod[0])
+        setSelectedProductImage(prod[0]);
       } else {
         handleCloseUpload();
       }
     }
-  }, [Products])
+  }, [Products]);
 
   async function updateProducts() {
     let pResp = await req("product");
@@ -736,19 +737,15 @@ function Stock(props) {
     setOpenSim(false);
   };
 
-
-
-
-
   const handleOpenUpload = (e) => {
     setSelectedProductImage(e);
     setUploadOpen(true);
-  }
+  };
 
   const handleCloseUpload = () => {
     setSelectedProductImage(null);
-    setUploadOpen(false)
-  }
+    setUploadOpen(false);
+  };
 
   const NotFound = (
     <div className="not-found">
@@ -805,7 +802,7 @@ function Stock(props) {
                       <Checkbox
                         checked={
                           printIDs.findIndex((r) => r[1] == e.product.p_id) !=
-                            -1
+                          -1
                             ? true
                             : false
                         }
@@ -905,7 +902,10 @@ function Stock(props) {
       </Modal>
 
       <Modal open={uploadOpen} closeFunction={handleCloseUpload}>
-        <UploadHandler product={selectedProductImage} refresh={updateProducts} />
+        <UploadHandler
+          product={selectedProductImage}
+          refresh={updateProducts}
+        />
       </Modal>
 
       <Modal
@@ -966,10 +966,10 @@ function Stock(props) {
                   modifyData.options.metal == ""
                     ? []
                     : [
-                      Metal.find(
-                        (opt) => opt.value == modifyData.options.metal
-                      ),
-                    ]
+                        Metal.find(
+                          (opt) => opt.value == modifyData.options.metal
+                        ),
+                      ]
                 }
                 clas="CustomSelectMargin"
                 placeholder="Choisir un Metal"
@@ -1267,7 +1267,7 @@ function Stock(props) {
   ) : (
     <Redirect
       to={{
-        pathname: "/app/login",
+        pathname: "/appfront/app/login",
         state: { error: true, msg: "Please Login" },
       }}
     />

@@ -29,12 +29,11 @@ function Echeance(props) {
     new Date(new Date().getTime() + 24 * 60 * 60 * 1000)
   );
 
-  const [selectedDate,setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   const [Echeance, setEcheance] = useState([]);
 
   const [Open, setOpen] = useState(false);
-
 
   const [Options, setOptions] = useState([
     {
@@ -47,28 +46,28 @@ function Echeance(props) {
     },
   ]);
 
-  const [SelectedOption,setSelectedOption] = useState(0);
+  const [SelectedOption, setSelectedOption] = useState(0);
   const [SelectedName, setSelectedName] = useState(null);
-  const [ConfirmOpen,setConfirm] = useState(false);
-  const [modifyOpen,setModify] = useState(false);
+  const [ConfirmOpen, setConfirm] = useState(false);
+  const [modifyOpen, setModify] = useState(false);
 
   const [modifyData, setmodifyData] = useState({
-    id : null,
-    total : 0,
-    paid : 0,
+    id: null,
+    total: 0,
+    paid: 0,
     dateEcheance: null,
   });
 
-  function loadModify(id){
-    for (let i = 0 ; i < Echeance.length ; i++){
-      if(Echeance[i].id == id){
-        let c = Echeance[i]
+  function loadModify(id) {
+    for (let i = 0; i < Echeance.length; i++) {
+      if (Echeance[i].id == id) {
+        let c = Echeance[i];
         let b = {
-          id : c.id,
-          total : c.total,
-          paid : c.paid,
-          dateEcheance : new Date(c.dateEcheance)
-        }
+          id: c.id,
+          total: c.total,
+          paid: c.paid,
+          dateEcheance: new Date(c.dateEcheance),
+        };
         setmodifyData(b);
         break;
       }
@@ -76,27 +75,27 @@ function Echeance(props) {
     setModify(!modifyOpen);
   }
 
-  function delData(id){
+  function delData(id) {
     console.log(id);
-    for (let i = 0 ; i < Echeance.length ; i++){
-      if(Echeance[i].id == id){
-        let c = Echeance[i]
+    for (let i = 0; i < Echeance.length; i++) {
+      if (Echeance[i].id == id) {
+        let c = Echeance[i];
         let b = {
-          name : c.name,
-          id : c.id,
-          total : c.total,
-          paid : c.paid,
-          dateEcheance : new Date(c.dateEcheance)
-        }
+          name: c.name,
+          id: c.id,
+          total: c.total,
+          paid: c.paid,
+          dateEcheance: new Date(c.dateEcheance),
+        };
         setmodifyData(b);
         break;
       }
     }
-    setConfirm(!ConfirmOpen)
+    setConfirm(!ConfirmOpen);
   }
 
   async function del(id) {
-    let resp = await postReq("delecheance/" + id,{});
+    let resp = await postReq("delecheance/" + id, {});
     let p = Echeance.filter((e) => e.id == id)[0];
     if (resp) {
       addToast("Echeance de " + p.name + " a ete supprime", {
@@ -108,37 +107,36 @@ function Echeance(props) {
     }
   }
 
-  function handleDateModify(d){
+  function handleDateModify(d) {
     console.log(d);
-    let c = {...modifyData}
+    let c = { ...modifyData };
     c.dateEcheance = d;
     setmodifyData(c);
   }
 
-  function handleField(e){
+  function handleField(e) {
     let t = e.target;
     let key = t.id;
     let v = t.value;
-    let c = {...modifyData}
+    let c = { ...modifyData };
     c[key] = v;
     setmodifyData(c);
   }
 
-  async function modify(id){
-    let resp = await postReq('modecheance/'+id,modifyData);
-    if (resp){
+  async function modify(id) {
+    let resp = await postReq("modecheance/" + id, modifyData);
+    if (resp) {
       addToast("Succès", {
         appearance: "success",
         autoDismiss: true,
       });
       updateEch();
-    }else{
+    } else {
       addToast("Erreur", {
         appearance: "error",
         autoDismiss: true,
       });
     }
-
   }
 
   const materialTheme = createTheme({
@@ -219,10 +217,10 @@ function Echeance(props) {
     });
   }, []);
 
-  async function updateUsers(){
-    let supResp = await  req('client');
-    let supResp2 = await req('provider')
-    let obj2 = {...Data};
+  async function updateUsers() {
+    let supResp = await req("client");
+    let supResp2 = await req("provider");
+    let obj2 = { ...Data };
     obj2.Clients = supResp;
     obj2.Suppliers = supResp2;
     setData(obj2);
@@ -260,17 +258,16 @@ function Echeance(props) {
     }
   }
 
-  function handleOption(v){
+  function handleOption(v) {
     setSelectedOption(v[0].value);
   }
 
-  function handleUser(v){
-    if(v.length > 0){
+  function handleUser(v) {
+    if (v.length > 0) {
       setSelectedName(v[0].name);
-    }else{
+    } else {
       setSelectedName(null);
     }
-    
   }
 
   function formatPrice(e) {
@@ -280,32 +277,30 @@ function Echeance(props) {
   }
 
   async function createEcheance() {
-    
-    let total = document.getElementById('total').value.split(' ')[0];
-    let paid = document.getElementById('paid').value.split(' ')[0];
+    let total = document.getElementById("total").value.split(" ")[0];
+    let paid = document.getElementById("paid").value.split(" ")[0];
     let body = {
       name: SelectedName,
       total,
       paid,
-      dateEcheance : selectedDate,
-      type : SelectedOption
-    }
+      dateEcheance: selectedDate,
+      type: SelectedOption,
+    };
 
     console.log(body);
-    let resp = await postReq('createecheance',body);
-    if (resp){
+    let resp = await postReq("createecheance", body);
+    if (resp) {
       addToast("Succès", {
         appearance: "success",
         autoDismiss: true,
       });
       updateEch();
-    }else{
+    } else {
       addToast("Erreur", {
         appearance: "error",
         autoDismiss: true,
       });
     }
-
   }
 
   const options = {
@@ -325,49 +320,55 @@ function Echeance(props) {
   const DataTable = (
     <Fragment>
       <div id="table-wrapper">
-      <table id="status-table">
-        <tbody>
-          <tr>
-            <th className="date">Nom</th>
-            <th>Montant Total</th>
-            <th>Montant Paye</th>
-            <th>Montant Restant</th>
-            <th classname="task-title">Date d'echeance</th>
-            <th></th>
-            <th></th>
-          </tr>
+        <table id="status-table">
+          <tbody>
+            <tr>
+              <th className="date">Nom</th>
+              <th>Montant Total</th>
+              <th>Montant Paye</th>
+              <th>Montant Restant</th>
+              <th classname="task-title">Date d'echeance</th>
+              <th></th>
+              <th></th>
+            </tr>
 
-          {Echeance.map((e) => {
-            return (
-              <tr>
-                <td className="date">{e.name}</td>
-                <td>{e.total + " DH"}</td>
-                <td>{e.paid + " DH"}</td>
-                <td>{e.reste + " DH"}</td>
-                <td className="task-title">
-                  {new Date(e.dateEcheance).toLocaleDateString(
-                    "fr-FR",
-                    options
-                  )}
-                </td>
-                <td className="edit" onClick={() => { loadModify(e.id)}/*modify(e.product.p_id)*/}>
-                  <FontAwesomeIcon icon={faEdit} className="trash" />
-                </td>
-                <td
-                  onClick={() => {
-                    //del(e.product.p_id);
-                    delData(e.id);
-                  }}
-                  className="delete"
-                >
-                  <FontAwesomeIcon icon={faTrashAlt} className="trash" />
-                </td>
-
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+            {Echeance.map((e) => {
+              return (
+                <tr>
+                  <td className="date">{e.name}</td>
+                  <td>{e.total + " DH"}</td>
+                  <td>{e.paid + " DH"}</td>
+                  <td>{e.reste + " DH"}</td>
+                  <td className="task-title">
+                    {new Date(e.dateEcheance).toLocaleDateString(
+                      "fr-FR",
+                      options
+                    )}
+                  </td>
+                  <td
+                    className="edit"
+                    onClick={
+                      () => {
+                        loadModify(e.id);
+                      } /*modify(e.product.p_id)*/
+                    }
+                  >
+                    <FontAwesomeIcon icon={faEdit} className="trash" />
+                  </td>
+                  <td
+                    onClick={() => {
+                      //del(e.product.p_id);
+                      delData(e.id);
+                    }}
+                    className="delete"
+                  >
+                    <FontAwesomeIcon icon={faTrashAlt} className="trash" />
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
     </Fragment>
   );
@@ -375,32 +376,40 @@ function Echeance(props) {
   const html = (
     <Fragment>
       <Modal open={ConfirmOpen} closeFunction={setConfirm}>
-        <h1 className="title-modal m20">{"Voulez-vous supprimer l'echeance de "+modifyData.name +" ?"}</h1>
-        <div className='modal-input-row'>
-        <button onClick={() => {
-                    del(modifyData.id);
-                    //delData(e.product.p_id);
-                  }} className="factsubmit" id="submit">Supprimer</button>
+        <h1 className="title-modal m20">
+          {"Voulez-vous supprimer l'echeance de " + modifyData.name + " ?"}
+        </h1>
+        <div className="modal-input-row">
+          <button
+            onClick={() => {
+              del(modifyData.id);
+              //delData(e.product.p_id);
+            }}
+            className="factsubmit"
+            id="submit"
+          >
+            Supprimer
+          </button>
         </div>
       </Modal>
       <Modal open={modifyOpen} closeFunction={setModify}>
         <h1 className="title-modal">Modification d'echeance</h1>
         <div className="modal-input">
-<ThemeProvider theme={materialTheme}>
-                <DatePicker
-                  variant="inline"
-                  label=""
-                  value={modifyData.dateEcheance}
-                  onChange={handleDateModify}
-                />
-              </ThemeProvider>
+          <ThemeProvider theme={materialTheme}>
+            <DatePicker
+              variant="inline"
+              label=""
+              value={modifyData.dateEcheance}
+              onChange={handleDateModify}
+            />
+          </ThemeProvider>
           <div className="input-wrapper">
             <label for="vente">Montant Total</label>
             <input
               type="text"
               placeholder="0 DH"
               onChange={handleField}
-              defaultValue = {modifyData.total +" DH"}
+              defaultValue={modifyData.total + " DH"}
               onBlur={formatPrice}
               id="total"
             ></input>
@@ -411,14 +420,18 @@ function Echeance(props) {
               type="text"
               placeholder="0 DH"
               onChange={handleField}
-              defaultValue = {modifyData.paid +" DH"}
+              defaultValue={modifyData.paid + " DH"}
               onBlur={formatPrice}
               id="paid"
             ></input>
           </div>
-          
 
-          <button id="submit" onClick={() => {modify(modifyData.id)} }>
+          <button
+            id="submit"
+            onClick={() => {
+              modify(modifyData.id);
+            }}
+          >
             Modifier
           </button>
         </div>
@@ -426,38 +439,39 @@ function Echeance(props) {
       <Modal open={Open} closeFunction={setOpen}>
         <h1 className="title-modal">Ajout d'echeance</h1>
         <div className="modal-input">
-        
           <CustomSelect
-              options={Options}
-              changeFunc={handleOption}
-              label="name"
-              fvalue="value"
-              clearable={false}
-              values={[
-                Options.find((opt) => opt.value == SelectedOption ),
-              ]}
-              placeholder="Client / Fournisseur"
-            />
+            options={Options}
+            changeFunc={handleOption}
+            label="name"
+            fvalue="value"
+            clearable={false}
+            values={[Options.find((opt) => opt.value == SelectedOption)]}
+            placeholder="Client / Fournisseur"
+          />
 
-<CustomSelect
-              options={SelectedOption == 0 ? Data.Clients : Data.Suppliers}
-              changeFunc={handleUser}
-              label="name"
-              fvalue="value"
-              /* values={[
+          <CustomSelect
+            options={SelectedOption == 0 ? Data.Clients : Data.Suppliers}
+            changeFunc={handleUser}
+            label="name"
+            fvalue="value"
+            /* values={[
                 Options.find((opt) => opt.value == ),
               ]} */
-              placeholder= {SelectedOption == 0 ? "Choisir un Client" : "Choisir un Fournisseur"} 
-            />
+            placeholder={
+              SelectedOption == 0
+                ? "Choisir un Client"
+                : "Choisir un Fournisseur"
+            }
+          />
 
-<ThemeProvider theme={materialTheme}>
-                <DatePicker
-                  variant="inline"
-                  label=""
-                  value={selectedDate}
-                  onChange={setSelectedDate}
-                />
-              </ThemeProvider>
+          <ThemeProvider theme={materialTheme}>
+            <DatePicker
+              variant="inline"
+              label=""
+              value={selectedDate}
+              onChange={setSelectedDate}
+            />
+          </ThemeProvider>
           <div className="input-wrapper">
             <label for="vente">Montant Total</label>
             <input
@@ -476,7 +490,6 @@ function Echeance(props) {
               id="paid"
             ></input>
           </div>
-          
 
           <button id="submit" onClick={createEcheance}>
             Creer
@@ -542,7 +555,7 @@ function Echeance(props) {
   ) : (
     <Redirect
       to={{
-        pathname: "/app/login",
+        pathname: "/appfront/app/login",
         state: { error: true, msg: "Please Login" },
       }}
     />

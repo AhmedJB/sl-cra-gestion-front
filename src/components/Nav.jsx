@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useContext , Fragment} from "react";
+import React, { useState, useEffect, useContext, Fragment } from "react";
 import { UserContext } from "../contexts/UserContext";
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   ProSidebar,
   Menu,
@@ -9,24 +9,22 @@ import {
   SidebarHeader,
   SidebarFooter,
   SidebarContent,
-} from 'react-pro-sidebar';
-import 'react-pro-sidebar/dist/css/styles.css';
+} from "react-pro-sidebar";
+import "react-pro-sidebar/dist/css/styles.css";
 
+function Nav(props) {
+  const [User, setUser] = useContext(UserContext);
+  function logout() {
+    let obj = { ...User };
+    obj.logged = false;
+    obj.username = null;
+    obj.email = null;
+    sessionStorage.removeItem("accessToken");
+    sessionStorage.removeItem("refreshToken");
+    setUser(obj);
+  }
 
-
-function Nav(props){
-    const [User, setUser] = useContext(UserContext);
-    function logout() {
-        let obj = { ...User };
-        obj.logged = false;
-        obj.username = null;
-        obj.email = null;
-        sessionStorage.removeItem("accessToken");
-        sessionStorage.removeItem("refreshToken");
-        setUser(obj);
-      }
-
-    /* return (
+  /* return (
         <Fragment>
         <input type="checkbox" id="toggle" />
   <label className="fa fa-bars" htmlFor="toggle" />
@@ -38,8 +36,8 @@ function Nav(props){
     <label className="fa fa-times" htmlFor="toggle" />
   </a>
   <ul>
-    <li> <Link  to='/app/pannel'><i className="fa fa-chart-bar" /><a> Dashboard </a></Link></li>
-    <li> <Link to='/app/vente'><i className="fa fa-shopping-cart" /><a> Vente </a></Link></li>
+    <li> <Link  to='/appfront/app/pannel'><i className="fa fa-chart-bar" /><a> Dashboard </a></Link></li>
+    <li> <Link to='/appfront/app/vente'><i className="fa fa-shopping-cart" /><a> Vente </a></Link></li>
     
     <li onClick={logout}><i className="fas fa-sign-out-alt" /><a> déconnecter </a></li>
   </ul>
@@ -53,39 +51,31 @@ function Nav(props){
 </Fragment>
     ) */
 
-    return ( <ProSidebar
-      image={false}
-      collapsed={true}
-      toggled={false}
-      breakPoint="md"
-      
-    >
+  return (
+    <ProSidebar image={false} collapsed={true} toggled={false} breakPoint="md">
       <SidebarHeader>
         <div
           style={{
-            padding: '24px',
-            textTransform: 'uppercase',
-            fontWeight: 'bold',
+            padding: "24px",
+            textTransform: "uppercase",
+            fontWeight: "bold",
             fontSize: 14,
-            letterSpacing: '1px',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
+            letterSpacing: "1px",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
           }}
         >
-         title
+          title
         </div>
       </SidebarHeader>
 
       <SidebarContent>
         <Menu iconShape="circle">
-          <MenuItem
-            
-            suffix={<span className="badge red">new</span>}
-          >
+          <MenuItem suffix={<span className="badge red">new</span>}>
             dashboard
           </MenuItem>
-          <MenuItem > item</MenuItem>
+          <MenuItem> item</MenuItem>
         </Menu>
         {/* <Menu iconShape="circle">
           <SubMenu
@@ -122,11 +112,11 @@ function Nav(props){
         </Menu> */}
       </SidebarContent>
 
-      <SidebarFooter style={{ textAlign: 'center' }}>
+      <SidebarFooter style={{ textAlign: "center" }}>
         <div
           className="sidebar-btn-wrapper"
           style={{
-            padding: '20px 24px',
+            padding: "20px 24px",
           }}
         >
           <a
@@ -135,16 +125,12 @@ function Nav(props){
             className="sidebar-btn"
             rel="noopener noreferrer"
           >
-            
             <span> source</span>
           </a>
         </div>
       </SidebarFooter>
-    </ProSidebar>)
-
-
+    </ProSidebar>
+  );
 }
-
-
 
 export default Nav;

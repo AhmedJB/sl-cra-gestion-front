@@ -26,26 +26,24 @@ function Pannel(props) {
     "#5900ff",
     "#5900ff",
   ];
-  const pieColors = [
-    "#4f7e9e" , "#654ea3" , "#804ea0" , "#944f9e" , "#9b5088"
-  ]
+  const pieColors = ["#4f7e9e", "#654ea3", "#804ea0", "#944f9e", "#9b5088"];
   const [Clients, setClients] = useState([]);
   const [Providers, setProviders] = useState([]);
   const [selectedProvider, setSelectedProvider] = useState(null);
-  const [selectedClient,setSelectedClient] = useState(null);
-  const [stable,setStable] = useState({
-    "ventes": {
-      "quantity": 0,
-      "total": 0
+  const [selectedClient, setSelectedClient] = useState(null);
+  const [stable, setStable] = useState({
+    ventes: {
+      quantity: 0,
+      total: 0,
     },
-    "achat": {
-        "quantity": 0,
-        "total": 0
+    achat: {
+      quantity: 0,
+      total: 0,
     },
-    "stock": {
-        "quantity": 0,
-        "total": 0
-    }
+    stock: {
+      quantity: 0,
+      total: 0,
+    },
   });
   const [options, setOptions] = useState({
     chart: {
@@ -53,7 +51,20 @@ function Pannel(props) {
     },
     colors: colors,
     xaxis: {
-      categories: ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'],
+      categories: [
+        "janvier",
+        "février",
+        "mars",
+        "avril",
+        "mai",
+        "juin",
+        "juillet",
+        "août",
+        "septembre",
+        "octobre",
+        "novembre",
+        "décembre",
+      ],
       labels: {
         style: {
           colors: "#fff",
@@ -61,7 +72,7 @@ function Pannel(props) {
         },
       },
     },
-    yaxis:{
+    yaxis: {
       labels: {
         style: {
           colors: "#fff",
@@ -77,14 +88,14 @@ function Pannel(props) {
     },
     stroke: {
       curve: "smooth",
-      colors :["#5900ff"]
+      colors: ["#5900ff"],
     },
     xaxis: {
       type: "datetime",
       categories: [
         "2021-09-28T21:32:46.038306Z",
-        "2021-09-28T23:49:15.267100Z"
-    ],
+        "2021-09-28T23:49:15.267100Z",
+      ],
       labels: {
         style: {
           colors: "#fff",
@@ -92,32 +103,28 @@ function Pannel(props) {
         },
       },
     },
-    yaxis:{
+    yaxis: {
       labels: {
         style: {
           colors: "#fff",
           fontSize: "12px",
         },
       },
-    }
-    ,
+    },
     tooltip: {
       x: {
         format: "dd/MM/yy HH:mm",
       },
     },
     markers: {
-      colors : ["#5900ff"]
-    }
+      colors: ["#5900ff"],
+    },
   });
 
   const [ProviderLineSeries, setProviderLineSeries] = useState([
     {
       name: "Quantite",
-      data: [
-        181,
-        500
-    ],
+      data: [181, 500],
     },
   ]);
   const [ProviderPieOptions, setProviderPieOptions] = useState({
@@ -135,7 +142,6 @@ function Pannel(props) {
       fontSize: "18px",
       labels: {
         colors: "#fff",
-        
       },
     },
   });
@@ -147,14 +153,14 @@ function Pannel(props) {
     },
     stroke: {
       curve: "smooth",
-      colors :["#5900ff"]
+      colors: ["#5900ff"],
     },
     xaxis: {
       type: "datetime",
       categories: [
         "2021-09-28T21:32:46.038306Z",
-        "2021-09-28T23:49:15.267100Z"
-    ],
+        "2021-09-28T23:49:15.267100Z",
+      ],
       labels: {
         style: {
           colors: "#fff",
@@ -162,7 +168,7 @@ function Pannel(props) {
         },
       },
     },
-    yaxis:{
+    yaxis: {
       labels: {
         style: {
           colors: "#fff",
@@ -176,17 +182,14 @@ function Pannel(props) {
       },
     },
     markers: {
-      colors : ["#5900ff"]
-    }
+      colors: ["#5900ff"],
+    },
   });
 
   const [clientLineSeries, setClientLineSeries] = useState([
     {
       name: "Total",
-      data: [
-        181,
-        500
-    ],
+      data: [181, 500],
     },
   ]);
   const [clientPieOptions, setClientPieOptions] = useState({
@@ -256,40 +259,38 @@ function Pannel(props) {
 
   // functions for data
 
-  async function updatePie(){
+  async function updatePie() {
     let resp = await req("getranks");
-    if (resp){
-      let temppie1 = {...clientPieOptions}
-      temppie1.labels = resp['clients_ranks'].clients;
-      let temppie2 = {...ProviderPieOptions}
-      temppie2.labels = resp['providers_ranks'].providers
+    if (resp) {
+      let temppie1 = { ...clientPieOptions };
+      temppie1.labels = resp["clients_ranks"].clients;
+      let temppie2 = { ...ProviderPieOptions };
+      temppie2.labels = resp["providers_ranks"].providers;
       setProviderPieOptions(temppie2);
-      setProviderPieSeries(resp['providers_ranks'].quantity);
-      setClientPieOptions(temppie1)
-      setClientPieSeries(resp['clients_ranks'].total)
-
+      setProviderPieSeries(resp["providers_ranks"].quantity);
+      setClientPieOptions(temppie1);
+      setClientPieSeries(resp["clients_ranks"].total);
     }
   }
 
-  async function updateStableData(){
+  async function updateStableData() {
     let resp = await req("getstable");
-    if (resp){
+    if (resp) {
       let temparticles = [...Articleseries];
       temparticles[0].data = resp.bar.ventes;
       let tempprofits = [...Profitseries];
       tempprofits[0].data = resp.bar.profit;
-      setProfitSeries(tempprofits)
-      setArticleSeries(temparticles)
+      setProfitSeries(tempprofits);
+      setArticleSeries(temparticles);
       console.log(tempprofits);
       setStable(resp);
     }
   }
 
-
-  async function updateUsers(){
-    let supResp = await  req('client');
-    let supResp2 = await req('provider')
-    let obj2 = {...Data};
+  async function updateUsers() {
+    let supResp = await req("client");
+    let supResp2 = await req("provider");
+    let obj2 = { ...Data };
     obj2.Clients = supResp;
     obj2.Suppliers = supResp2;
     setClients(supResp);
@@ -297,69 +298,51 @@ function Pannel(props) {
     setData(obj2);
   }
 
-  async function loadSupplierLine(vs){
-    let series = [
-      181,
-      500
-  ];
-    let cats = [
-      "2021-09-28T21:32:46.038306Z",
-      "2021-09-28T23:49:15.267100Z"
-  ];
-    if (vs.length != 0){
-      
+  async function loadSupplierLine(vs) {
+    let series = [181, 500];
+    let cats = ["2021-09-28T21:32:46.038306Z", "2021-09-28T23:49:15.267100Z"];
+    if (vs.length != 0) {
       let v = vs[0];
       setSelectedProvider(v.id);
-      let resp = await req('getproviderdata/'+v.id);
-      if (resp){
+      let resp = await req("getproviderdata/" + v.id);
+      if (resp) {
         series = resp.q;
         cats = resp.dates;
       }
-    }else{
+    } else {
       setSelectedProvider(null);
     }
     console.log(series);
-    let temp = {...ProviderLineOptions};
+    let temp = { ...ProviderLineOptions };
     temp.xaxis.categories = cats;
-    let temp2 = [...ProviderLineSeries]
+    let temp2 = [...ProviderLineSeries];
     setProviderLineOption(temp);
-    temp2[0].data = series
+    temp2[0].data = series;
     setProviderLineSeries(temp2);
-    
-  };
+  }
 
-  async function loadClientLine(vs){
-    let series = [
-      181,
-      500
-  ];
-    let cats = [
-      "2021-09-28T21:32:46.038306Z",
-      "2021-09-28T23:49:15.267100Z"
-  ];
-    if (vs.length != 0){
-      
+  async function loadClientLine(vs) {
+    let series = [181, 500];
+    let cats = ["2021-09-28T21:32:46.038306Z", "2021-09-28T23:49:15.267100Z"];
+    if (vs.length != 0) {
       let v = vs[0];
       setSelectedClient(v.id);
-      let resp = await req('getclientdata/'+v.id);
-      if (resp){
+      let resp = await req("getclientdata/" + v.id);
+      if (resp) {
         series = resp.q;
         cats = resp.dates;
       }
-    }else{
+    } else {
       setSelectedClient(null);
     }
     console.log(series);
-    let temp = {...clientLineOptions};
+    let temp = { ...clientLineOptions };
     temp.xaxis.categories = cats;
-    let temp2 = [...clientLineSeries]
+    let temp2 = [...clientLineSeries];
     setClientLineOption(temp);
-    temp2[0].data = series
+    temp2[0].data = series;
     setClientLineSeries(temp2);
-    
-  };
-
-
+  }
 
   const Card = styled.div`
     background: #000000;
@@ -389,7 +372,7 @@ function Pannel(props) {
 
           <div className="card-column">
             <p>Total</p>
-            <p className="box">{stable.ventes.total +"DH"}</p>
+            <p className="box">{stable.ventes.total + "DH"}</p>
           </div>
         </div>
       </Card>
@@ -403,7 +386,7 @@ function Pannel(props) {
 
           <div className="card-column">
             <p>Total</p>
-            <p className="box">{stable.achat.total +"DH"}</p>
+            <p className="box">{stable.achat.total + "DH"}</p>
           </div>
         </div>
       </Card>
@@ -417,7 +400,7 @@ function Pannel(props) {
 
           <div className="card-column">
             <p>Total</p>
-            <p className="box">{stable.stock.total +"DH"}</p>
+            <p className="box">{stable.stock.total + "DH"}</p>
           </div>
         </div>
       </Card>
@@ -427,15 +410,21 @@ function Pannel(props) {
   const supplierChart = (
     <div className="row">
       <Card width="90%" height="auto" minHeight="500px">
-        <div className='title-select-row'>
-        <h3 className="card-title text-center inline">Fournisseur</h3>
-        <div className="inline">
-        <CustomSelect options={Data.Suppliers} changeFunc={loadSupplierLine}
-label="name" multi={false} values={Data.Suppliers.filter(e => e.id == selectedProvider)} fvalue="id" placeholder="Choisir un Fournisseur" />
+        <div className="title-select-row">
+          <h3 className="card-title text-center inline">Fournisseur</h3>
+          <div className="inline">
+            <CustomSelect
+              options={Data.Suppliers}
+              changeFunc={loadSupplierLine}
+              label="name"
+              multi={false}
+              values={Data.Suppliers.filter((e) => e.id == selectedProvider)}
+              fvalue="id"
+              placeholder="Choisir un Fournisseur"
+            />
+          </div>
         </div>
-        
-        </div>
-        
+
         <div className="inner-row">
           <div className="grow">
             <Chart
@@ -445,14 +434,17 @@ label="name" multi={false} values={Data.Suppliers.filter(e => e.id == selectedPr
               height="400"
             />
           </div>
-          {ProviderPieSeries.length != 0 ? <Chart
-            options={ProviderPieOptions}
-            series={ProviderPieSeries}
-            type="donut"
-            height="600"
-            width="300"
-          /> : ""}
-          
+          {ProviderPieSeries.length != 0 ? (
+            <Chart
+              options={ProviderPieOptions}
+              series={ProviderPieSeries}
+              type="donut"
+              height="600"
+              width="300"
+            />
+          ) : (
+            ""
+          )}
         </div>
       </Card>
     </div>
@@ -461,16 +453,22 @@ label="name" multi={false} values={Data.Suppliers.filter(e => e.id == selectedPr
   const clientChart = (
     <div className="row">
       <Card width="90%" height="auto" minHeight="500px">
-      <div className='title-select-row'>
-        <h3 className="card-title text-center inline">Clients</h3>
-        <div className="inline">
-        <CustomSelect options={Data.Clients} changeFunc={loadClientLine}
-      label="name" multi={false} values={Data.Clients.filter(e => e.id == selectedClient)} fvalue="id" placeholder="Choisir un Client" />
-        </div>
-        
+        <div className="title-select-row">
+          <h3 className="card-title text-center inline">Clients</h3>
+          <div className="inline">
+            <CustomSelect
+              options={Data.Clients}
+              changeFunc={loadClientLine}
+              label="name"
+              multi={false}
+              values={Data.Clients.filter((e) => e.id == selectedClient)}
+              fvalue="id"
+              placeholder="Choisir un Client"
+            />
+          </div>
         </div>
         <div className="inner-row">
-        <div className="grow">
+          <div className="grow">
             <Chart
               options={clientLineOptions}
               series={clientLineSeries}
@@ -478,16 +476,18 @@ label="name" multi={false} values={Data.Suppliers.filter(e => e.id == selectedPr
               height="400"
             />
           </div>
-          { clientPieSeries.length != 0 ? <Chart
-            options={clientPieOptions}
-            series={clientPieSeries}
-            type="donut"
-            height="600"
-            width="300"
-          /> : ""  }
-          
+          {clientPieSeries.length != 0 ? (
+            <Chart
+              options={clientPieOptions}
+              series={clientPieSeries}
+              type="donut"
+              height="600"
+              width="300"
+            />
+          ) : (
+            ""
+          )}
         </div>
-        
       </Card>
     </div>
   );
@@ -530,8 +530,6 @@ label="name" multi={false} values={Data.Suppliers.filter(e => e.id == selectedPr
         {clientChart}
         {articleChart}
         {profitChart}
-
-
       </div>
     </Fragment>
   );
@@ -553,7 +551,7 @@ label="name" multi={false} values={Data.Suppliers.filter(e => e.id == selectedPr
   ) : (
     <Redirect
       to={{
-        pathname: "/app/login",
+        pathname: "/appfront/app/login",
         state: { error: true, msg: "Please Login" },
       }}
     />

@@ -1509,7 +1509,7 @@ function HistoryV(props) {
   ) : (
     <Redirect
       to={{
-        pathname: "/app/login",
+        pathname: "/appfront/app/login",
         state: { error: true, msg: "Please Login" },
       }}
     />
