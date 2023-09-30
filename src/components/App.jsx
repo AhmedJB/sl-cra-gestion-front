@@ -23,7 +23,7 @@ import DateFnsUtils from "@date-io/date-fns";
 import frLocale from "date-fns/locale/fr";
 
 const App = (props) => {
-  const base = "appfront/app";
+  const base = "/appfront/app";
 
   return (
     <DataProvider>
