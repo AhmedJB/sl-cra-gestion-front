@@ -135,7 +135,7 @@ function Stock(props) {
   useEffect(() => {
     async function test() {
       let resp = await isLogged();
-      //console.log(resp);
+      ////console.log(resp);
       if (resp) {
         let obj = { ...User };
         obj.logged = true;
@@ -153,7 +153,7 @@ function Stock(props) {
 
     test().then((obj) => {
       setLoading(false);
-      //console.log(obj);
+      ////console.log(obj);
       if (props.location.state) {
         if (props.location.state.success) {
           addToast("connecté en tant que " + obj.username, {
@@ -191,9 +191,9 @@ function Stock(props) {
     }else {
       act = (active + step) >= 0 ? active+step : SeperatedProducts.length - 1;
     }
-    console.log("steps");
-    console.log(SeperatedProducts.length);
-    console.log(act);
+    //console.log("steps");
+    //console.log(SeperatedProducts.length);
+    //console.log(act);
     setActive(act);
   } */
 
@@ -221,8 +221,8 @@ function Stock(props) {
   const initiated = useRef(false);
   useEffect(() => {
     if (initiated.current) {
-      console.log("this is a callback");
-      console.log(!fetchLoading);
+      //console.log("this is a callback");
+      //console.log(!fetchLoading);
       setFetchLoading(false);
     } else {
       initiated.current = true;
@@ -246,7 +246,7 @@ function Stock(props) {
     let pResp = await req("product");
     let obj = { ...Data };
     obj.Products = pResp;
-    console.log("updating products");
+    //console.log("updating products");
     setProduct(pResp);
     setData(obj);
     return true;
@@ -360,7 +360,7 @@ function Stock(props) {
       body.options.metal = "";
       body.options.type = "";
     }
-    //console.log(body);
+    ////console.log(body);
     setModifyData(body);
   }
 
@@ -419,7 +419,7 @@ function Stock(props) {
         appearance: "success",
         autoDismiss: true,
       });
-      //console.log(resp);
+      ////console.log(resp);
       updateProducts();
       //updateSuppliers();
     } else {
@@ -457,7 +457,7 @@ function Stock(props) {
       temp.total_name = temp.name + " (" + q + ")";
       arr.push(temp);
     }
-    console.log(arr);
+    //console.log(arr);
     return arr;
   }
 
@@ -544,7 +544,7 @@ function Stock(props) {
     } else {
       let arr = [];
       let p = ps[0];
-      //console.log(p);
+      ////console.log(p);
       for (let i = 0; i < Products.length; i++) {
         if (Products[i].product.place == p.value) {
           arr.push(Products[i]);
@@ -557,7 +557,7 @@ function Stock(props) {
   async function modify(id) {
     setModify(!ModifyOpen);
     let mod = Products.filter((e) => e.product.p_id == id)[0];
-    //console.log(mod);
+    ////console.log(mod);
     if (mod.product.ptype == "eau") {
       setViewModify(true);
     } else {
@@ -570,7 +570,7 @@ function Stock(props) {
   async function delData(id) {
     setConfirm(!ConfirmOpen);
     let mod = Products.filter((e) => e.product.p_id == id)[0];
-    //console.log(mod);
+    ////console.log(mod);
     if (mod.product.ptype == "eau") {
       setViewModify(true);
     } else {
@@ -617,7 +617,7 @@ function Stock(props) {
         appearance: "success",
         autoDismiss: true,
       });
-      //console.log(resp);
+      ////console.log(resp);
       updateData();
       //updateSuppliers();
     } else {
@@ -629,8 +629,8 @@ function Stock(props) {
   }
 
   function checkChange(checked, val) {
-    //console.log(checked)
-    //console.log(val)
+    ////console.log(checked)
+    ////console.log(val)
     let copy = [...printIDs];
     if (checked) {
       if (val != "all") {
@@ -645,13 +645,13 @@ function Stock(props) {
     } else {
       if (val != "all") {
         let index = printIDs.findIndex((i) => i == val);
-        //console.log('value is ' + index)
+        ////console.log('value is ' + index)
         copy.splice(index, 1);
       } else {
         copy = [];
       }
     }
-    //console.log(copy);
+    ////console.log(copy);
     setPrintIDs(copy);
   }
 
@@ -708,15 +708,15 @@ function Stock(props) {
 
   const handleOpenSim = () => {
     let name = document.getElementById("name").value;
-    console.log("name is ", name);
+    //console.log("name is ", name);
     if (name.length > 0) {
       let produits = Data.Products;
       let elements = produits.map((e) => e.product.name);
       let matches = stringSimilarity.findBestMatch(name, elements);
       let sortedMatches = sortByRatingDescending(matches.ratings).slice(0, 5);
-      console.log("the sorted matches are ", sortedMatches);
+      //console.log("the sorted matches are ", sortedMatches);
       let sortedArray = sortedMatches.map((e) => e.target);
-      console.log("sorted array ", sortedArray);
+      //console.log("sorted array ", sortedArray);
       let filteredMatches = [];
       for (let i = 0; i < sortedArray.length; i++) {
         for (let j = 0; j < produits.length; j++) {
@@ -726,7 +726,7 @@ function Stock(props) {
           }
         }
       }
-      console.log("result : ", filteredMatches);
+      //console.log("result : ", filteredMatches);
       setSimilars(filteredMatches);
     }
     setOpenSim(true);
@@ -774,16 +774,16 @@ function Stock(props) {
                   }}
                 />
               </th>
-              <th classname="date">ID</th>
-              <th classname="task-title">Nom du Produit</th>
-              <th classname="status">Categorie</th>
+              <th className="date">ID</th>
+              <th className="task-title">Nom du Produit</th>
+              <th className="status">Categorie</th>
               {/*  <th>Metal</th>
-          <th classname="tel">Type</th> */}
+          <th className="tel">Type</th> */}
               <th>Quantite</th>
-              {/* <th classname="tel">Prix Achat</th> */}
-              <th classname="tel">Prix Vente</th>
+              {/* <th className="tel">Prix Achat</th> */}
+              <th className="tel">Prix Vente</th>
               {/* <th>Montant Payé</th> */}
-              <th classname="tel">Fournisseur</th>
+              <th className="tel">Fournisseur</th>
               <th></th>
               <th></th>
               <th></th>
@@ -794,10 +794,10 @@ function Stock(props) {
             </tr>
 
             {SeperatedProducts[active] &&
-              SeperatedProducts[active].map((e) => {
-                //console.log(e);
+              SeperatedProducts[active].map((e, i) => {
+                ////console.log(e);
                 return (
-                  <tr>
+                  <tr key={`stock-f-${i}`}>
                     <td>
                       <Checkbox
                         checked={
@@ -822,17 +822,17 @@ function Stock(props) {
                       />
                     </td>
                     <td>{e.product.p_id}</td>
-                    <td classname="date">{e.product.name}</td>
-                    <td classname="task-title">{names[e.product.ptype]}</td>
-                    {/* <td classname="status">{e.options.metal}</td>
-          <td classname="date">
+                    <td className="date">{e.product.name}</td>
+                    <td className="task-title">{names[e.product.ptype]}</td>
+                    {/* <td className="status">{e.options.metal}</td>
+          <td className="date">
             {e.options.type}
           </td> */}
-                    <td classname="status">{e.product.quantity}</td>
-                    {/* <td classname="status">{e.product.price_achat + ' DH'}</td> */}
-                    <td classname="status">{e.product.price_vente + " DH"}</td>
+                    <td className="status">{e.product.quantity}</td>
+                    {/* <td className="status">{e.product.price_achat + ' DH'}</td> */}
+                    <td className="status">{e.product.price_vente + " DH"}</td>
                     {/* <td>{e.product.paid + ' DH'}</td> */}
-                    <td classname="status">{getSupp(e.fournisseur.id)}</td>
+                    <td className="status">{getSupp(e.fournisseur.id)}</td>
                     <td className="edit" onClick={() => modify(e.product.p_id)}>
                       <FontAwesomeIcon icon={faEdit} className="trash" />
                     </td>
@@ -1229,7 +1229,7 @@ function Stock(props) {
               </div>
 
               <button
-                class="btn-main"
+                className="btn-main"
                 onClick={() => {
                   handleOptionOpen();
                 }}
@@ -1238,7 +1238,7 @@ function Stock(props) {
               </button>
 
               <button
-                class="btn-main"
+                className="btn-main"
                 onClick={() => {
                   handleOpen();
                 }}

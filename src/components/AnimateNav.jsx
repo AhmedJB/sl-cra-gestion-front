@@ -114,15 +114,15 @@ function AnimateNav(props) {
   const t = isOpen
     ? (() => {
         let t = document.querySelector("body");
-        console.log("test");
+        //console.log("test");
 
         t.style.overflowY = "hidden";
-        console.log(t.style.overflowY);
+        //console.log(t.style.overflowY);
       })()
     : (() => {
         let t = document.querySelector("body");
-        console.log(t);
-        console.log("test2");
+        //console.log(t);
+        //console.log("test2");
         t.style.overflowY = "auto";
       })();
   const reff = useDetectClickOutside({ onTriggered: handleClick });

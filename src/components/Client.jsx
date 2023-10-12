@@ -53,7 +53,7 @@ function Client(props) {
   useEffect(() => {
     async function test() {
       let resp = await isLogged();
-      console.log(resp);
+      //console.log(resp);
       if (resp) {
         let obj = { ...User };
         obj.logged = true;
@@ -69,7 +69,7 @@ function Client(props) {
 
     test().then((obj) => {
       setLoading(false);
-      console.log(obj);
+      //console.log(obj);
       if (props.location.state) {
         if (props.location.state.success) {
           addToast("connecté en tant que " + obj.username, {
@@ -133,14 +133,14 @@ function Client(props) {
       for (let i = 0; i < v.length; i++) {
         temp = Data.Clients.filter((e) => e.id == v[i].id);
         for (let i = 0; i < temp.length; i++) {
-          console.log(temp);
+          //console.log(temp);
           d.push(temp[i]);
         }
       }
     } else {
       d = Data.Clients;
     }
-    console.log(d);
+    //console.log(d);
     setClients(d);
   }
 
@@ -160,13 +160,13 @@ function Client(props) {
   async function modify(id) {
     setModify(!ModiyOpen);
     let mod = Clients.filter((e) => e.id == id)[0];
-    console.log(mod);
+    //console.log(mod);
     setModifyData(mod);
     //let resp = await modifyClient(id);
   }
   async function delData(id) {
     let mod = Clients.filter((e) => e.id == id)[0];
-    console.log(mod);
+    //console.log(mod);
     setModifyData(mod);
     setConfirm(!ConfirmOpen);
   }
@@ -216,19 +216,19 @@ function Client(props) {
           <tbody>
             <tr>
               <th className="date">Nom</th>
-              <th classname="task-title">Email</th>
-              <th classname="status">Tel</th>
+              <th className="task-title">Email</th>
+              <th className="status">Tel</th>
               <th className="address">Address</th>
               <th>Credit</th>
-              <th classname="tel">Date</th>
+              <th className="tel">Date</th>
               <th></th>
               <th></th>
             </tr>
 
             {Seperated[active] &&
-              Seperated[active].map((e) => {
+              Seperated[active].map((e, i) => {
                 return (
-                  <tr>
+                  <tr key={`Clients-${i}`}>
                     <td className="date">{e.name}</td>
                     <td className="task-title">{e.email}</td>
                     <td className="status">{e.phone}</td>
@@ -368,7 +368,7 @@ function Client(props) {
                 placeholder="Choisir un Client"
               />
               <button
-                class="btn-main"
+                className="btn-main"
                 onClick={() => {
                   setOpen(!open);
                 }}

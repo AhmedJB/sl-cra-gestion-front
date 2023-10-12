@@ -41,6 +41,8 @@ import { makePDF } from "multi-page-html2pdf";
 import usePagination from "./hooks/usePagination";
 import Pagination from "./Utils/Pagination";
 import AdditionRow from "./Utils/AdditionRow";
+import Logo1 from "../static/pics/LOGO-1.png";
+import Logo2 from "../static/pics/LOGOa.png";
 
 function HistoryV(props) {
   const { addToast } = useToasts();
@@ -704,9 +706,9 @@ function HistoryV(props) {
         <div className="top-padding">
           <section className="top-content bb d-flex justify-content-between">
             <div className="logo-facture">
-              <img src="/static/pics/LOGO-1.png" alt className="img-fluid" />
+              <img src={Logo1} alt className="img-fluid" />
             </div>
-            <img id="watermark" src="/static/pics/LOGOa.png" />
+            <img id="watermark" src={Logo2} />
             {/* <div className="top-left">
         <div className="graphic-path">
           <p id="bon-title">Bon De livraison</p>
@@ -839,9 +841,9 @@ function HistoryV(props) {
       <div className="top-padding">
         <section className="top-content bb d-flex justify-content-between">
           <div className="logo-facture">
-            <img src="/static/pics/LOGO-1.png" alt className="img-fluid" />
+            <img src={Logo1} alt className="img-fluid" />
           </div>
-          <img id="watermark" src="/static/pics/LOGOa.png" />
+          <img id="watermark" src={Logo2} />
           {/* <div className="top-left">
         <div className="graphic-path">
           <p>Facture</p>
@@ -1004,9 +1006,9 @@ function HistoryV(props) {
         <div className="top-padding">
           <section className="top-content bb d-flex justify-content-between">
             <div className="logo-facture">
-              <img src="/static/pics/LOGO-1.png" alt className="img-fluid" />
+              <img src={Logo1} alt className="img-fluid" />
             </div>
-            <img id="watermark" src="/static/pics/LOGOa.png" />
+            <img id="watermark" src={Logo2} />
             {/* <div className="top-left">
         <div className="graphic-path">
           <p>Facture</p>

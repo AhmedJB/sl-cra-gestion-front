@@ -65,6 +65,7 @@ const links = [
   "/appfront/app/supply",
   "/appfront/app/echeance",
   "/appfront/app/historyv",
+  "",
 ];
 
 export const MenuItem = ({ i }) => {
@@ -91,7 +92,7 @@ export const MenuItem = ({ i }) => {
       variants={variants}
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.95 }}
-      onClick={text[i] == "Deconnexion" ? logout : ""}
+      onClick={text[i] == "Deconnexion" ? logout : () => {}}
     >
       <Link to={links[i]}>
         <div className="icon-placeholder" style={style}>
