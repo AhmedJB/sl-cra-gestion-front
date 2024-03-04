@@ -557,7 +557,7 @@ function Stock(props) {
   async function modify(id) {
     setModify(!ModifyOpen);
     let mod = Products.filter((e) => e.product.p_id == id)[0];
-    ////console.log(mod);
+    console.log(mod);
     if (mod.product.ptype == "eau") {
       setViewModify(true);
     } else {
@@ -937,9 +937,7 @@ function Stock(props) {
               changeFunc={handleOptionv2}
               label="name"
               fvalue="value"
-              values={[
-                Options.find((opt) => opt.value == modifyData.product.ptype),
-              ]}
+              values={Options.filter((opt) => opt.value == modifyData.product.ptype)}
               placeholder="Choisir un Produit"
             />
             {/* <CustomSelect options={Place}  changeFunc={handlePlacev2}
