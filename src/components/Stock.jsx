@@ -823,7 +823,7 @@ function Stock(props) {
                     </td>
                     <td>{e.product.p_id}</td>
                     <td className="date">{e.product.name}</td>
-                    <td className="task-title">{names[e.product.ptype]}</td>
+                    <td className="task-title">{ Options && Options.filter(o => o.value ===e.product.ptype).length > 0 ?  Options.filter(o => o.value ===e.product.ptype)[0].name : ""}</td>
                     {/* <td className="status">{e.options.metal}</td>
           <td className="date">
             {e.options.type}
