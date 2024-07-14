@@ -17,12 +17,14 @@ import {
   faExclamationCircle,
   faMicrophoneAltSlash,
   faTrashAlt,
+  faWarehouse
 } from "@fortawesome/free-solid-svg-icons";
 import Select from "react-dropdown-select";
 import CustomSelect from "./CustomSelect";
 import Modal from "./Modal";
 import usePagination from "./hooks/usePagination";
 import Pagination from "./Utils/Pagination";
+import DataTableWithPagination from "./Utils/DataTableWithPagination";
 
 function Supplier(props) {
   const { addToast } = useToasts();
@@ -31,8 +33,12 @@ function Supplier(props) {
   const [Data, setData] = useContext(DataContext);
   const [Suppliers, setSuppliers] = useState(Data.Suppliers);
   const [ConfirmOpen, setConfirm] = useState(false);
+  const [selectedSupplier,setSelectedSupplier] = useState(null)
+  const [stockData,setStockData] = useState([]);
+  const [changeData,setChangeData] = useState([]);
 
   const [open, setOpen] = useState(false);
+  const [openChange, setOpenChange] = useState(false);
   const [ModiyOpen, setModify] = useState(false);
   const [modifyData, setModifyData] = useState({
     name: "",
@@ -86,6 +92,34 @@ function Supplier(props) {
       }
     });
   }, []);
+
+
+  const fetchChangeData = async (supp) => {
+    const resp = await req(`provider-products?fid=${supp.id}`)
+    if (resp){
+      setChangeData(resp)
+    }else{
+      
+    }
+  }
+
+  const handleSelectProduct = (v) => {
+    console.log("selected changes")
+    console.log(v)
+    if (v.length >  0){
+      setStockData([...v[0].changes])
+    }else{
+      setStockData([])
+    }
+  }
+
+
+  useEffect(() =>  {
+    if (selectedSupplier){
+      console.log(selectedSupplier)
+      fetchChangeData(selectedSupplier)
+    }
+  },[selectedSupplier])
 
   const options = {
     weekday: "long",
@@ -209,6 +243,13 @@ function Supplier(props) {
     }
   }
 
+  const openSupplierChange = (supp) => {
+    console.log(supp)
+    setSelectedSupplier(supp);
+    setOpenChange(true);
+
+  }
+
   const NotFound = (
     <div className="not-found">
       <h2 className="error-text">Resultat : 0</h2>
@@ -230,6 +271,7 @@ function Supplier(props) {
               <th classname="tel">Date</th>
               <th></th>
               <th></th>
+              <th></th>
             </tr>
 
             {Seperated[active] &&
@@ -244,6 +286,7 @@ function Supplier(props) {
                     <td className="date">
                       {new Date(e.date).toLocaleDateString("fr-FR", options)}
                     </td>
+                   <td className="edit" onClick={() => openSupplierChange(e)}><FontAwesomeIcon icon={faWarehouse} className="trash"  /></td> 
                     <td className="edit" onClick={() => modify(e.id)}>
                       <FontAwesomeIcon icon={faEdit} className="trash" />
                     </td>
@@ -351,6 +394,23 @@ function Supplier(props) {
           <button id="submit" onClick={createSupplier}>
             Creer
           </button>
+        </div>
+      </Modal>
+      <Modal open={openChange} closeFunction={setOpenChange}>
+        <h1 className="title-modal">Historique du stock</h1>
+        <div className="modal-input">
+        <CustomSelect
+                options={changeData}
+                changeFunc={handleSelectProduct}
+                label="name"
+                multi={false}
+                fvalue="p_id"
+                placeholder="Choisir un Produit"
+              />
+
+        {
+          stockData &&  stockData.length > 0 && <DataTableWithPagination  data_={stockData} />
+        }
         </div>
       </Modal>
       <AnimateNav />
