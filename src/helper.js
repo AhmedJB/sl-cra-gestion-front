@@ -2,6 +2,7 @@ import fileDownload from "js-file-download";
 import axios from "axios";
 
 const base_url = "http://85.31.236.214/gestionapp";
+//const base_url = "http://127.0.0.1:8000";
 const api = base_url + "/api/";
 
 //var fileDownload = require('js-file-download');
@@ -370,4 +371,8 @@ export function logout(setUser, User) {
   sessionStorage.removeItem("accessToken");
   sessionStorage.removeItem("refreshToken");
   setUser(obj);
+}
+
+export function sortByRatingDescending(array) {
+  return array.sort((a, b) => b.rating - a.rating);
 }

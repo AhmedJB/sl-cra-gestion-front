@@ -59,6 +59,7 @@ function HistoryV(props) {
     paid: 0,
     details: [],
   });
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [Open, setOpen] = useState(false);
   const [Orders, setOrders] = useState([]);
   const [BackUpOrders, setBackUpOrders] = useState([]);
@@ -563,14 +564,15 @@ function HistoryV(props) {
   }
 
   async function updateOrder() {
-    resp = {
+    setLoadingSubmit(true);
+    let body = {
       details: Details,
       deleted: DeletedOrder.details,
       ret: DeletedOrder.order.ret,
       date: DeletedOrder.order.date,
     };
 
-    let resp = await postReq("modorder", resp);
+    let resp = await postReq("modorder", body);
     if (resp) {
       if (DeletedOrder.details.length > 0) {
         let options = {
@@ -604,6 +606,7 @@ function HistoryV(props) {
         autoDismiss: true,
       });
     }
+    setLoadingSubmit(false);
   }
 
   async function handleClose(arg) {
@@ -1431,8 +1434,12 @@ function HistoryV(props) {
             className="icon-animation addIcon "
           />
         </div>
-        <button id="submit" onClick={() => updateOrder()}>
-          Modifier
+        <button
+          id="submit"
+          onClick={() => updateOrder()}
+          disabled={loadingSubmit}
+        >
+          {loadingSubmit ? "Wait..." : "Modifier"}
         </button>
       </Modal>
 

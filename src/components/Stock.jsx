@@ -39,6 +39,7 @@ import Pagination from "./Utils/Pagination";
 import StockChange from "./Utils/StockChange";
 import stringSimilarity from "string-similarity";
 import UploadHandler from "./Utils/UploadHandler";
+import { sortByRatingDescending } from "../helper";
 
 function Stock(props) {
   const { addToast } = useToasts();
@@ -82,6 +83,7 @@ function Stock(props) {
   const [Products, setProduct] = useState([]);
   const [changesOpen, setChangesOpen] = useState(false);
   const [changesProdId, setChangesProdId] = useState(null);
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
   //const [SeperatedProducts,setSeperatedProducts] = useState([]);
   //const [active,setActive] = useState(0);
 
@@ -243,12 +245,14 @@ function Stock(props) {
   }, [Products]);
 
   async function updateProducts() {
+    setLoadingSubmit(true);
     let pResp = await req("product");
     let obj = { ...Data };
     obj.Products = pResp;
     //console.log("updating products");
     setProduct(pResp);
     setData(obj);
+    setLoadingSubmit(false);
     return true;
   }
 
@@ -395,6 +399,7 @@ function Stock(props) {
   }
 
   async function CreateProduct() {
+    setLoadingSubmit(true);
     let body = { ...Body };
     body.product.name = document.getElementById("name").value;
 
@@ -428,6 +433,7 @@ function Stock(props) {
         autoDismiss: true,
       });
     }
+    setLoadingSubmit(false);
   }
 
   function getSupp(id) {
@@ -593,6 +599,7 @@ function Stock(props) {
   }
 
   async function ModifyProduct(id) {
+    setLoadingSubmit(true);
     let body = { ...modifyData };
     body.product.name = document.getElementById("name").value;
 
@@ -626,6 +633,7 @@ function Stock(props) {
         autoDismiss: true,
       });
     }
+    setLoadingSubmit(false);
   }
 
   function checkChange(checked, val) {
@@ -680,6 +688,7 @@ function Stock(props) {
   };
 
   const createCategorie = async () => {
+    setLoadingSubmit(true);
     let name = document.getElementById("optionName").value;
     let value = document.getElementById("optionValue").value;
     let body = {
@@ -700,11 +709,8 @@ function Stock(props) {
         autoDismiss: true,
       });
     }
+    setLoadingSubmit(false);
   };
-
-  function sortByRatingDescending(array) {
-    return array.sort((a, b) => b.rating - a.rating);
-  }
 
   const handleOpenSim = () => {
     let name = document.getElementById("name").value;
@@ -1029,8 +1035,13 @@ function Stock(props) {
             </div>
           </div>
 
-          <button id="submit" onClick={ModifyProduct} className="modalSubmit">
-            Modifier
+          <button
+            id="submit"
+            onClick={ModifyProduct}
+            className="modalSubmit"
+            disabled={loadingSubmit}
+          >
+            {loadingSubmit ? "Wait..." : "Modifier"}
           </button>
         </div>
       </Modal>
@@ -1124,8 +1135,13 @@ function Stock(props) {
             </div>
           </div>
 
-          <button id="submit" onClick={CreateProduct} className="modalSubmit">
-            Creer
+          <button
+            id="submit"
+            onClick={CreateProduct}
+            className="modalSubmit"
+            disabled={loadingSubmit}
+          >
+            {loadingSubmit ? "Wait..." : "Creer"}
           </button>
         </div>
       </Modal>
@@ -1169,8 +1185,13 @@ function Stock(props) {
             <input type="text" id="optionValue"></input>
           </div>
 
-          <button id="submit" onClick={createCategorie} className="modalSubmit">
-            Creer
+          <button
+            id="submit"
+            onClick={createCategorie}
+            className="modalSubmit"
+            disabled={loadingSubmit}
+          >
+            {loadingSubmit ? "Wait..." : "Creer"}
           </button>
         </div>
       </Modal>

@@ -17,12 +17,15 @@ import {
   faExclamationCircle,
   faMicrophoneAltSlash,
   faTrashAlt,
+  faSearch,
 } from "@fortawesome/free-solid-svg-icons";
 import Select from "react-dropdown-select";
 import CustomSelect from "./CustomSelect";
 import Modal from "./Modal";
 import usePagination from "./hooks/usePagination";
 import Pagination from "./Utils/Pagination";
+import stringSimilarity from "string-similarity";
+import { sortByRatingDescending } from "../helper";
 
 function Supplier(props) {
   const { addToast } = useToasts();
@@ -31,7 +34,7 @@ function Supplier(props) {
   const [Data, setData] = useContext(DataContext);
   const [Suppliers, setSuppliers] = useState(Data.Suppliers);
   const [ConfirmOpen, setConfirm] = useState(false);
-
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [open, setOpen] = useState(false);
   const [ModiyOpen, setModify] = useState(false);
   const [modifyData, setModifyData] = useState({
@@ -46,6 +49,8 @@ function Supplier(props) {
   // for pagination and loading loader
   const [Seperated, active, handleDirection] = usePagination(Suppliers);
   const [fetchLoading, setFetchLoading] = useState(true);
+  const [openSim, setOpenSim] = useState(false);
+  const [similars, setSimilars] = useState([]);
 
   const initiated = useRef(false);
   useEffect(() => {
@@ -87,6 +92,37 @@ function Supplier(props) {
     });
   }, []);
 
+  const handleOpenSim = () => {
+    let name = document.getElementById("name").value;
+    //console.log("name is ", name);
+    if (name.length > 0) {
+      let suppliers = [...Suppliers];
+      let elements = suppliers.map((e) => e.name);
+      let matches = stringSimilarity.findBestMatch(name, elements);
+      let sortedMatches = sortByRatingDescending(matches.ratings).slice(0, 5);
+      //console.log("the sorted matches are ", sortedMatches);
+      let sortedArray = sortedMatches.map((e) => e.target);
+      //console.log("sorted array ", sortedArray);
+      let filteredMatches = [];
+      for (let i = 0; i < sortedArray.length; i++) {
+        for (let j = 0; j < suppliers.length; j++) {
+          if (suppliers[j].name === sortedArray[i]) {
+            filteredMatches.push(suppliers[j]);
+            break;
+          }
+        }
+      }
+      //console.log("result : ", filteredMatches);
+      setSimilars(filteredMatches);
+    }
+    setOpenSim(true);
+  };
+
+  const handleCloseSim = () => {
+    setSimilars([]);
+    setOpenSim(false);
+  };
+
   const options = {
     weekday: "long",
     year: "numeric",
@@ -95,15 +131,18 @@ function Supplier(props) {
   };
 
   async function updateSuppliers() {
+    setLoadingSubmit(true);
     let supResp = await req("provider");
     let obj2 = { ...Data };
     obj2.Suppliers = supResp;
     setData(obj2);
     setSuppliers(supResp);
+    setLoadingSubmit(false);
     return true;
   }
 
   async function createSupplier() {
+    setLoadingSubmit(true);
     let name = document.getElementById("name").value;
     let email = document.getElementById("email").value;
     let phone = document.getElementById("phone").value;
@@ -123,6 +162,7 @@ function Supplier(props) {
         autoDismiss: true,
       });
     }
+    setLoadingSubmit(false);
   }
 
   function formatPrice2(e) {
@@ -179,6 +219,7 @@ function Supplier(props) {
   }
 
   async function modifySupplier(id) {
+    setLoadingSubmit(true);
     let name = document.getElementById("name_m").value;
     let email = document.getElementById("email_m").value;
     let phone = document.getElementById("phone_m").value;
@@ -207,6 +248,7 @@ function Supplier(props) {
         autoDismiss: true,
       });
     }
+    setLoadingSubmit(false);
   }
 
   const NotFound = (
@@ -294,7 +336,7 @@ function Supplier(props) {
         </div>
       </Modal>
       <Modal open={ModiyOpen} closeFunction={setModify}>
-        <h1 className="title-modal">Ajout de fournisseur</h1>
+        <h1 className="title-modal">Modification de fournisseur</h1>
         <div className="modal-input">
           <label for="name">Nom</label>
           <input type="text" defaultValue={modifyData.name} id="name_m"></input>
@@ -331,16 +373,29 @@ function Supplier(props) {
             id="credit_pm"
           ></input>
 
-          <button id="submit" onClick={() => modifySupplier(modifyData.id)}>
-            Modifier
+          <button
+            id="submit"
+            onClick={() => modifySupplier(modifyData.id)}
+            disabled={loadingSubmit}
+          >
+            {loadingSubmit ? "Wait..." : "Modifier"}
           </button>
         </div>
       </Modal>
+
       <Modal open={open} closeFunction={setOpen}>
-        <h1 className="title-modal">Modification de fournisseur</h1>
+        <h1 className="title-modal">Ajout de fournisseur</h1>
         <div className="modal-input">
           <label for="name">Nom</label>
-          <input type="text" id="name"></input>
+          <div className="flex-container-row balancer-input">
+            <input type="text" id="name"></input>
+
+            <FontAwesomeIcon
+              onClick={handleOpenSim}
+              icon={faSearch}
+              className="trash icon-m"
+            />
+          </div>
           <label for="email">Email</label>
           <input type="text" id="email"></input>
           <label for="phone">Tel</label>
@@ -348,9 +403,28 @@ function Supplier(props) {
           <label for="add">Address</label>
           <input type="text" id="add"></input>
 
-          <button id="submit" onClick={createSupplier}>
-            Creer
+          <button id="submit" onClick={createSupplier} disabled={loadingSubmit}>
+            {loadingSubmit ? "Wait..." : "Creer"}
           </button>
+        </div>
+      </Modal>
+      <Modal open={openSim} closeFunction={handleCloseSim}>
+        <h1 className="title-modal m20">Similar Things</h1>
+        <div id="table-wrapper">
+          <table id="status-table">
+            <tbody>
+              <tr>
+                <th>ID</th>
+                <th>Nom</th>
+              </tr>
+              {similars.map((e, i) => (
+                <tr key={`matches-${i}`}>
+                  <td>{e.id}</td>
+                  <td>{e.name}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </Modal>
       <AnimateNav />
@@ -380,8 +454,9 @@ function Supplier(props) {
                 onClick={() => {
                   setOpen(!open);
                 }}
+                disabled={loadingSubmit}
               >
-                Ajouter un Fournisseur
+                {loadingSubmit ? "Wait..." : "Ajouter un Fournisseur"}
               </button>
             </div>
 
