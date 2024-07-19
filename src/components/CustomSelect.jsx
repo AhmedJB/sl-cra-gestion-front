@@ -42,6 +42,7 @@ function CustomSelect(props) {
   }
 
   function test({ props, state, methods }) {
+    console.log(props)
     /* //console.log(props)
         //console.log(state)
         //console.log(methods)
@@ -55,6 +56,7 @@ function CustomSelect(props) {
                 //console.log(opts[i].name)
             } */
       if (
+        state.search &&  
         opts[i][props.searchTerm]
           .toLowerCase()
           .startsWith(state.search.toLowerCase())

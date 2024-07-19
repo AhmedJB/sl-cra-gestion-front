@@ -75,6 +75,7 @@
     max-height: 80vh;
     width:auto; 
     max-width: 95%;
+    min-height: 200px;
 
     overflow-y: auto;
     padding: 50px;

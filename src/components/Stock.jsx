@@ -563,7 +563,7 @@ function Stock(props) {
   async function modify(id) {
     setModify(!ModifyOpen);
     let mod = Products.filter((e) => e.product.p_id == id)[0];
-    ////console.log(mod);
+    console.log(mod);
     if (mod.product.ptype == "eau") {
       setViewModify(true);
     } else {
@@ -829,7 +829,7 @@ function Stock(props) {
                     </td>
                     <td>{e.product.p_id}</td>
                     <td className="date">{e.product.name}</td>
-                    <td className="task-title">{names[e.product.ptype]}</td>
+                    <td className="task-title">{ Options && Options.filter(o => o.value ===e.product.ptype).length > 0 ?  Options.filter(o => o.value ===e.product.ptype)[0].name : ""}</td>
                     {/* <td className="status">{e.options.metal}</td>
           <td className="date">
             {e.options.type}
@@ -943,9 +943,7 @@ function Stock(props) {
               changeFunc={handleOptionv2}
               label="name"
               fvalue="value"
-              values={[
-                Options.find((opt) => opt.value == modifyData.product.ptype),
-              ]}
+              values={Options.filter((opt) => opt.value == modifyData.product.ptype)}
               placeholder="Choisir un Produit"
             />
             {/* <CustomSelect options={Place}  changeFunc={handlePlacev2}

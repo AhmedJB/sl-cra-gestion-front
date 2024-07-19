@@ -36,6 +36,7 @@ function Supplier(props) {
   const [ConfirmOpen, setConfirm] = useState(false);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [open, setOpen] = useState(false);
+  const [openChange, setOpenChange] = useState(false);
   const [ModiyOpen, setModify] = useState(false);
   const [modifyData, setModifyData] = useState({
     name: "",
@@ -122,6 +123,31 @@ function Supplier(props) {
     setSimilars([]);
     setOpenSim(false);
   };
+
+  const fetchChangeData = async (supp) => {
+    const resp = await req(`provider-products?fid=${supp.id}`);
+    if (resp) {
+      setChangeData(resp);
+    } else {
+    }
+  };
+
+  const handleSelectProduct = (v) => {
+    console.log("selected changes");
+    console.log(v);
+    if (v.length > 0) {
+      setStockData([...v[0].changes]);
+    } else {
+      setStockData([]);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedSupplier) {
+      console.log(selectedSupplier);
+      fetchChangeData(selectedSupplier);
+    }
+  }, [selectedSupplier]);
 
   const options = {
     weekday: "long",
@@ -251,6 +277,12 @@ function Supplier(props) {
     setLoadingSubmit(false);
   }
 
+  const openSupplierChange = (supp) => {
+    console.log(supp);
+    setSelectedSupplier(supp);
+    setOpenChange(true);
+  };
+
   const NotFound = (
     <div className="not-found">
       <h2 className="error-text">Resultat : 0</h2>
@@ -272,6 +304,7 @@ function Supplier(props) {
               <th classname="tel">Date</th>
               <th></th>
               <th></th>
+              <th></th>
             </tr>
 
             {Seperated[active] &&
@@ -285,6 +318,9 @@ function Supplier(props) {
                     <td className="credit">{e.credit + " DH"}</td>
                     <td className="date">
                       {new Date(e.date).toLocaleDateString("fr-FR", options)}
+                    </td>
+                    <td className="edit" onClick={() => openSupplierChange(e)}>
+                      <FontAwesomeIcon icon={faWarehouse} className="trash" />
                     </td>
                     <td className="edit" onClick={() => modify(e.id)}>
                       <FontAwesomeIcon icon={faEdit} className="trash" />
