@@ -18,6 +18,7 @@ import {
   faMicrophoneAltSlash,
   faTrashAlt,
   faSearch,
+  faWarehouse,
 } from "@fortawesome/free-solid-svg-icons";
 import Select from "react-dropdown-select";
 import CustomSelect from "./CustomSelect";
@@ -46,6 +47,9 @@ function Supplier(props) {
     credit: "",
     id: null,
   });
+  const [selectedSupplier, setSelectedSupplier] = useState(null);
+  const [stockData, setStockData] = useState([]);
+  const [changeData, setChangeData] = useState([]);
 
   // for pagination and loading loader
   const [Seperated, active, handleDirection] = usePagination(Suppliers);
