@@ -27,6 +27,7 @@ import usePagination from "./hooks/usePagination";
 import Pagination from "./Utils/Pagination";
 import stringSimilarity from "string-similarity";
 import { sortByRatingDescending } from "../helper";
+import DataTableWithPagination from "./Utils/DataTableWithPagination";
 
 function Supplier(props) {
   const { addToast } = useToasts();
@@ -466,6 +467,25 @@ function Supplier(props) {
             </tbody>
           </table>
         </div>
+      </Modal>
+      <Modal open={openChange} closeFunction={setOpenChange}>
+        <h1 className="title-modal">Historique du stock</h1>
+        {changeData && changeData.length > 0 && (
+          <div className="modal-input">
+            <CustomSelect
+              options={changeData}
+              changeFunc={handleSelectProduct}
+              label="name"
+              multi={false}
+              fvalue="p_id"
+              placeholder="Choisir un Produit"
+            />
+
+            {stockData && stockData.length > 0 && (
+              <DataTableWithPagination data_={stockData} />
+            )}
+          </div>
+        )}
       </Modal>
       <AnimateNav />
       <section className="card Supplier">
