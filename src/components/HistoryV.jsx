@@ -748,6 +748,8 @@ function HistoryV(props) {
             <table id="fact-table" className="table table-hover">
               <thead>
                 <tr>
+                  <td>N<sup>o</sup>
+                  </td>
                   <td>Quantite</td>
                   <td>Designation</td>
                   <td>P.U</td>
@@ -755,9 +757,10 @@ function HistoryV(props) {
                 </tr>
               </thead>
               <tbody>
-                {order.details.map((e) => {
+                {order.details.map((e,i) => {
                   return (
                     <tr>
+                      <td>{i+1}</td>
                       <td>{e.quantity}</td>
                       <td>
                         <div className="media">
