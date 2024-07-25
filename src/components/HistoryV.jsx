@@ -750,8 +750,9 @@ function HistoryV(props) {
                 <tr>
                   <td>N<sup>o</sup>
                   </td>
-                  <td>Quantite</td>
+                  
                   <td>Designation</td>
+                  <td>Quantite</td>
                   <td>P.U</td>
                   <td>Total</td>
                 </tr>
@@ -761,7 +762,6 @@ function HistoryV(props) {
                   return (
                     <tr>
                       <td>{i+1}</td>
-                      <td>{e.quantity}</td>
                       <td>
                         <div className="media">
                           <div className="media-body">
@@ -769,6 +769,7 @@ function HistoryV(props) {
                           </div>
                         </div>
                       </td>
+                      <td>{e.quantity}</td>
                       <td>{e.prix}DH</td>
                       <td>{e.prix * e.quantity}DH</td>
                     </tr>
