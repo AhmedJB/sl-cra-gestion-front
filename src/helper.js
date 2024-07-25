@@ -1,7 +1,7 @@
 import fileDownload from "js-file-download";
 import axios from "axios";
 
-const base_url = "http://85.31.236.214/gestionapp";
+const base_url = "http://85.31.236.214:8080/gestionapp";
 //const base_url = "http://127.0.0.1:8000";
 const api = base_url + "/api/";
 
