@@ -123,6 +123,7 @@ function HistoryV(props) {
   const [addedRows, setAddedRows] = useState([]);
   const [chosenOrderID, setChosenOrderID] = useState(null);
 
+
   const updateTransport = async () => {
     let resp = await req("transport/");
     if (resp) {
@@ -1269,16 +1270,18 @@ function HistoryV(props) {
       </div>
     </Fragment>
   );
-
+  const subLoader = <><div className="lds-facebook">
+  <div />
+  <div />
+  <div />
+</div></>
   const loader = (
     <div className="animation-container">
-      <div className="lds-facebook">
-        <div />
-        <div />
-        <div />
-      </div>
+      {subLoader}
     </div>
   );
+
+  
 
   const html = (
     <Fragment>

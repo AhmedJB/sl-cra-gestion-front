@@ -10,6 +10,7 @@ function AdditionRow({ products, details, deleteFromList, orderID, updateOrders 
   const [quantity, setQuantity] = useState(0);
   const [price, setPrice] = useState(0);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [addLoading,setAddLoading] = useState(false);
 
   function clearField(e) {
     let t = e.target;
@@ -65,6 +66,7 @@ function AdditionRow({ products, details, deleteFromList, orderID, updateOrders 
 
   const validate = async () => {
     if (selectedProduct) {
+      setAddLoading(true);
       let body = {
         order: orderID,
         provider_id: selectedProduct.fournisseur.id,
@@ -92,6 +94,7 @@ function AdditionRow({ products, details, deleteFromList, orderID, updateOrders 
           });
         }
       }
+      setAddLoading(false)
 
 
     } else {
@@ -101,6 +104,17 @@ function AdditionRow({ products, details, deleteFromList, orderID, updateOrders 
       });
     }
   };
+
+  const subLoader = <><div className="lds-facebook">
+  <div />
+  <div />
+  <div />
+</div></>
+  
+
+  const addLoader = <div className="add-loader-container">
+    {subLoader}
+  </div>
 
   return (
     <tr>
@@ -150,7 +164,8 @@ function AdditionRow({ products, details, deleteFromList, orderID, updateOrders 
       >
         <FontAwesomeIcon icon={faTrashAlt} className="trash" />
       </td>
-      <td
+      {
+        !addLoading && <td
         onClick={() => {
           validate();
         }}
@@ -158,6 +173,12 @@ function AdditionRow({ products, details, deleteFromList, orderID, updateOrders 
       >
         <FontAwesomeIcon icon={faCheck} className="trash" />
       </td>
+      }
+
+      {
+        addLoading && <td className="delete">{addLoader}</td>
+      }
+      
     </tr>
   );
 }

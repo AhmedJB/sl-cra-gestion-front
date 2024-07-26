@@ -950,6 +950,15 @@ and (orientation : portrait) {
     align-items: center;
 }
 
+.add-loader-container{
+    transform: scale(0.5);
+    width:16px;
+    aspect-ratio: 1/1;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .lds-facebook {
     display: inline-block;
     position: relative;
