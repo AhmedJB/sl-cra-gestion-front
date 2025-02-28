@@ -1,0 +1,1 @@
+export const target_store = 2  // 1 : bensouda || 2 : labeta

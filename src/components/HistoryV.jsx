@@ -43,6 +43,7 @@ import Pagination from "./Utils/Pagination";
 import AdditionRow from "./Utils/AdditionRow";
 import Logo1 from "../static/pics/LOGO-1.png";
 import Logo2 from "../static/pics/LOGOa.png";
+import { target_store } from "../config";
 
 function HistoryV(props) {
   const { addToast } = useToasts();
@@ -784,7 +785,7 @@ function HistoryV(props) {
                       <tr>
                         <td />
                         <td />
-                        <td className="bord">Total HT:</td>
+                        <td className="bord">Total {target_store ===  2 ? "TTC" : "HT"}:</td>
                         <td className="bord">
                           {round(SelectedOrder.order.total)}DH
                         </td>
@@ -1083,10 +1084,12 @@ function HistoryV(props) {
                       <tr>
                         <td />
                         <td />
-                        <td>Total HT:</td>
+                        <td>Total {target_store ===  2  ? "TTC" : "HT"}:</td>
                         <td>{round(SelectedOrder.order.total)}DH</td>
                       </tr>
-                      <tr>
+                      {
+                        target_store  === 1 && <>
+                          <tr>
                         <td />
                         <td />
                         <td>TVA 20%:</td>
@@ -1106,6 +1109,9 @@ function HistoryV(props) {
                           DH
                         </td>
                       </tr>
+                        </>
+                      }
+                      
                     </tfoot>
                   );
                 }
