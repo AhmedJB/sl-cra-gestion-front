@@ -709,7 +709,8 @@ function HistoryV(props) {
         size="A4"
       >
         <div className="top-padding">
-          <section className="top-content bb d-flex justify-content-between">
+          {
+            target_store  === 2 && <section className="top-content bb d-flex justify-content-between">
             <div className="logo-facture">
               <img src={Logo1} alt className="img-fluid" />
             </div>
@@ -720,10 +721,12 @@ function HistoryV(props) {
         </div>
       </div> */}
           </section>
+          }
+          
           <section className="store-user mt-5">
             <div className="col-12 center-elem">
               <p>
-                Bon De livraison N<sup>°</sup>:{" "}
+                Bon de livraison N<sup>°</sup>:{" "}
                 <span>#{SelectedOrder.order.o_id}</span>
               </p>
             </div>
@@ -1027,7 +1030,7 @@ function HistoryV(props) {
           <section className="store-user mt-5">
             <div className="col-12 center-elem">
               <p>
-                Facture N<sup>°</sup>: <span>#{SelectedOrder.order.o_id}</span>
+                Facture N<sup>°</sup>: {target_store  === 2  && <span>#{SelectedOrder.order.o_id}</span>}
               </p>
             </div>
             <div className="col-10">
@@ -1038,13 +1041,16 @@ function HistoryV(props) {
                 </div>
                 <div>
                   <p>Le,</p>
-                  <h2>
+                  {
+                    target_store === 2 &&  <h2>
                     {new Date(SelectedOrder.order.date).getUTCDate() +
                       "-" +
                       (new Date(SelectedOrder.order.date).getUTCMonth() + 1) +
                       "-" +
                       new Date(SelectedOrder.order.date).getUTCFullYear()}
                   </h2>
+                  }
+                  
                 </div>
               </div>
             </div>
