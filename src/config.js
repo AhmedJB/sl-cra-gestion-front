@@ -1,1 +1,1 @@
-export const target_store = 1  // 1 : bensouda || 2 : labeta
+export const target_store = process.env.REACT_APP_TARGET_STORE  // 1 : bensouda || 2 : labeta

@@ -11,6 +11,7 @@ import AnimateNav from "./AnimateNav";
 import { logout } from "../helper";
 import ReactTooltip from "react-tooltip";
 import CustomSelect from "./CustomSelect";
+import { target_store } from "../config";
 
 function Pannel(props) {
   const { addToast } = useToasts();
@@ -237,6 +238,7 @@ function Pannel(props) {
         await updateUsers();
         await updateStableData();
         await updatePie();
+        await fetchSalesData();
         return obj;
       } else {
         logout(setUser, User);
@@ -256,6 +258,141 @@ function Pannel(props) {
       }
     });
   }, []);
+
+  useEffect(() => {
+    console.log(`Env here `,target_store);
+  },[import.meta.env])
+
+  // sales data
+  const [saleData, setSalesData] = useState({}); // To store fetched data
+  const [selectedSaleProduct, setSelectedSaleProduct] = useState(""); // Currently selected product
+  const [chartSellOptions, setChartSellOptions] = useState({}); // ApexCharts options
+  const [chartSellLineOptions, setChartSellLineOptions] = useState({}); // ApexCharts options
+  const [chartSellSeries, setChartSellSeries] = useState([]); // ApexCharts series
+  const [chartSellLineSeries, setChartSellLineSeries] = useState([]); // ApexCharts series
+
+  // Fetch data from the backend
+  const fetchSalesData = async () => {
+    try {
+      const fetchedData = await req("getsalestats");
+
+      // Set the fetched data
+      setSalesData(fetchedData);
+
+      // Set the first product as the default selection
+      const firstProduct = Object.keys(fetchedData)[0];
+      setSelectedSaleProduct(firstProduct);
+
+      // Update the chart with the first product's data
+      updateChart(firstProduct, fetchedData);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  // Function to update the chart based on the selected product
+  const updateChart = (product, allData) => {
+    const productData = allData[product];
+
+    // Extract months and sales data
+    const months = Object.keys(productData);
+    const sales = months.map(month => productData[month].total_sales);
+    const quantity_sales  = months.map(month => productData[month].total_quantity);
+    console.log(product)
+
+    // Update ApexCharts options and series
+    setChartSellOptions({
+      chart: {
+        id: "basic-bar",
+      },
+      colors: colors,
+      xaxis: {
+        categories: months,
+        labels: {
+          style: {
+            colors: "#fff",
+            fontSize: "12px",
+          },
+        },
+      },
+      yaxis: {
+        labels: {
+          style: {
+            colors: "#fff",
+            fontSize: "12px",
+          },
+        },
+      },
+    });
+
+    setChartSellLineOptions({
+      dataLabels: {
+        enabled: false,
+      },
+      stroke: {
+        curve: "smooth",
+        colors: ["#5900ff"],
+      },
+      xaxis: {
+        categories: months,
+        labels: {
+          style: {
+            colors: "#fff",
+            fontSize: "12px",
+          },
+        },
+      },
+      yaxis: {
+        labels: {
+          style: {
+            colors: "#fff",
+            fontSize: "12px",
+          },
+        },
+      },
+      tooltip: {
+        x: {
+          format: "dd/MM/yy HH:mm",
+        },
+      },
+      markers: {
+        colors: ["#5900ff"],
+      },
+    })
+
+    setChartSellSeries([
+      {
+        name: "Total Sales",
+        data: sales, // Sales data on the y-axis
+      },
+    ]);
+    setChartSellLineSeries([
+      {
+        name: "Quantite",
+        data: quantity_sales, // Sales data on the y-axis
+      },
+    ]);
+  };
+
+  const handleChangeProduct =  (vs) => {
+    console.log(vs)
+    let pr = null;
+    if (vs.length > 0){
+      setSelectedSaleProduct(vs[0].name)
+      pr = vs[0].name;
+    }else{
+      setSelectedSaleProduct(Object.keys(saleData)[0])
+      pr = Object.keys(saleData)[0];
+    }
+    
+  }
+
+  useEffect(()  => {
+    if  (selectedSaleProduct && selectedSaleProduct.length > 0 && saleData){
+      console.log(`updating  ${selectedSaleProduct}`)
+      updateChart(selectedSaleProduct,saleData);
+    }
+  },[selectedSaleProduct])
 
   // functions for data
 
@@ -344,6 +481,68 @@ function Pannel(props) {
     setClientLineSeries(temp2);
   }
 
+
+  const [topProducts, setTopProducts] = useState([]); // State to store fetched data
+  const [chartTopOptions, setChartTopOptions] = useState({}); // ApexCharts options
+  const [chartTopSeries, setChartTopSeries] = useState([]); // ApexCharts series
+
+
+
+
+
+
+
+  useEffect(() => {
+    // Fetch the top 5 products from the backend
+    const fetchTopData = async () => {
+      try {
+        const data = await req("gettop5");
+
+        // Update state with fetched data
+        setTopProducts(data);
+
+        // Prepare ApexCharts options and series
+        
+
+        const options = {
+          labels: data.map((product) => product.product_name),
+          colors: pieColors,
+          dataLabels: {
+            enabled: false,
+          },
+          stroke: {
+            show: true,
+            colors: ["transparent"],
+            width: 0,
+          },
+          legend: {
+            labels: {
+              colors: "#fff",
+            },
+          },
+        }
+
+        const series = data.map((product) => product.total_quantity); // Quantities as series
+
+        // Update chart options and series
+        setChartTopOptions(options);
+        setChartTopSeries(series);
+      } catch (error) {
+        console.error("Error fetching top products:", error);
+      }
+    };
+
+    fetchTopData();
+  }, []);
+
+
+
+
+
+
+
+
+
   const Card = styled.div`
     background: #000000;
     background: -webkit-linear-gradient(bottom right, #000000, #282828);
@@ -359,6 +558,51 @@ function Pannel(props) {
     height: ${(props) => props.height};
     min-height: ${(props) => props.minHeight};
   `;
+
+  const salesChart = (
+    <div className="row">
+      <Card width="90%" height="auto" minHeight="500px">
+        <div className="title-select-row">
+          <h3 className="card-title text-center inline">Produits</h3>
+          <div className="inline">
+            <CustomSelect
+              options={Object.keys(saleData).map(e=>({name : e}))}
+              changeFunc={handleChangeProduct}
+              label="name"
+              multi={false}
+              values={[{name : selectedSaleProduct}]}
+              fvalue="name"
+              placeholder="Choisir un produit"
+            />
+          </div>
+        </div>
+        <div className="center-graph">
+          {chartTopSeries.length !== 0 ? (
+          <Chart
+            options={chartTopOptions}
+            series={chartTopSeries}
+            type="donut"
+            height="600"
+            width="300"
+          />
+        ) : (
+          <p>Loading...</p>
+        )}
+        </div>
+        
+        <Chart options={chartSellOptions} series={chartSellSeries} type="bar" height="400" />
+
+        <Chart
+              options={chartSellLineOptions}
+              series={chartSellLineSeries}
+              type="line"
+              height="400"
+            />
+        
+       
+      </Card>
+    </div>
+  );
 
   const overview = (
     <div className="row">
@@ -406,6 +650,19 @@ function Pannel(props) {
       </Card>
     </div>
   );
+
+  const top5chart = (
+    <div className="row">
+      <div className="card" style={{ width: "90%", height: "auto", minHeight: "500px" }}>
+        <div className="title-select-row">
+          <h3 className="card-title text-center inline">Top Produits</h3>
+        </div>
+
+        {/* Render the chart if data is available */}
+        
+      </div>
+    </div>
+  )
 
   const supplierChart = (
     <div className="row">
@@ -526,10 +783,12 @@ function Pannel(props) {
       <ReactTooltip id="test"></ReactTooltip>
       <div className="pannel-container">
         {overview}
+        {salesChart}
         {supplierChart}
         {clientChart}
         {articleChart}
         {profitChart}
+
       </div>
     </Fragment>
   );

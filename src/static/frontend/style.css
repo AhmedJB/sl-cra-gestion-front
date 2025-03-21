@@ -1070,3 +1070,10 @@ and (orientation : portrait) {
 .balancer-input{
     margin-left: 35px;
 }
+
+.center-graph{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0px 20px 0px;
+}
