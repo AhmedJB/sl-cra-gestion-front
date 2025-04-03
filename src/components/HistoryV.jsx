@@ -815,7 +815,7 @@ function HistoryV(props) {
           </section>
           {/* Cart BG */}
           {/*  <img src="/static/pics/cart.jpg" className="img-fluid cart-bg" alt /> */}
-          <footer id="footer-facture">
+          {/* <footer id="footer-facture">
             <hr />
             <p className="m-0 text-center  colortext">
               10 Lot Baraka Wiam Bensouda Mag 3 ‐ Fès / GSM: 06 61 08 56 62
@@ -842,7 +842,7 @@ function HistoryV(props) {
                 <span>ICE: 000010730000029</span>
               </span>
             </div>
-          </footer>
+          </footer> */}
         </div>
       </div>
     );
