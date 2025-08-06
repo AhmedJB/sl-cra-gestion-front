@@ -30,7 +30,10 @@ import {
   faPlus,
   faSearch,
   faUpload,
+  faShoppingCart,
+  faCartPlus
 } from "@fortawesome/free-solid-svg-icons";
+
 import CustomSelect from "./CustomSelect";
 import Checkbox from "@mui/material/Checkbox";
 import Modal from "./Modal";
@@ -40,6 +43,7 @@ import StockChange from "./Utils/StockChange";
 import stringSimilarity from "string-similarity";
 import UploadHandler from "./Utils/UploadHandler";
 import { sortByRatingDescending } from "../helper";
+import Cart from "./Cart";
 
 function Stock(props) {
   const { addToast } = useToasts();
@@ -84,8 +88,15 @@ function Stock(props) {
   const [changesOpen, setChangesOpen] = useState(false);
   const [changesProdId, setChangesProdId] = useState(null);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
-  //const [SeperatedProducts,setSeperatedProducts] = useState([]);
-  //const [active,setActive] = useState(0);
+  // cart state
+  const [cart,setCart] = useState([]);
+  const [submitOptions, setSubmitOptions] = useState({
+    total: 0,
+    paid: 0,
+    modePayment: 0
+  });
+  const [cartOpen,setCartOpen] = useState(false)
+  //***** end state  *******/
 
   const [Metal, setMetal] = useState([
     {
@@ -126,6 +137,158 @@ function Stock(props) {
       type: "",
     },
   });
+
+  // cart management
+
+  function getProd(id) {
+    for (let i = 0; i < cart.length; i++) {
+      if (cart[i].id == id) {
+        return i
+      }
+    }
+    return -1
+  }
+
+  function updateTotal(total,paid=null) {
+    let temp = { ...submitOptions }
+    temp.total = total
+    if (paid){
+      temp.paid = paid
+    }
+    setSubmitOptions(temp)
+  }
+
+  function calculateTotal(prods = null) {
+    if (!prods) {
+      prods = cart
+    }
+    let total = 0
+    for (let i = 0; i < prods.length; i++) {
+      total += prods[i].quantity * prods[i].price_vente
+    }
+    return total
+  }
+
+  async function fetchProduct(id) {
+    let resp = await req('getproduct/' + String(id))
+    let temp = [...cart]
+    let index = getProd(resp.id)
+    console.log(index)
+    if (resp) {
+      if (index != -1) {
+        let temp2 = { ...temp[index] }
+        if (temp2.quantity + 1 <= resp.quantity){
+          resp.quantity = temp2.quantity + 1
+        }
+        
+        console.log(temp)
+        temp.splice(index, 1)
+        
+        temp.push(resp)
+        let t = document.getElementById(String(resp.id))
+        t.value = resp.quantity
+        console.log('added')
+        addToast("Produit : " + resp.p_id + " est ajouté", {
+          appearance: "success",
+          autoDismiss: true,
+        });
+      } else {
+        if (resp.quantity > 0){
+          resp.quantity = 1
+          temp.push(resp);
+          addToast("Produit : " + resp.p_id + " est ajouté", {
+            appearance: "success",
+            autoDismiss: true,
+          });
+        }else{
+          addToast("Quantite insuffisente", {
+            appearance: "error",
+            autoDismiss: true,
+          });
+        }
+        
+        
+      }
+    }
+
+    
+
+    let tot = calculateTotal(temp)
+    updateTotal(tot,tot)
+    setCart(temp)
+  }
+
+  async function handleCartProduct(p_ids) {
+    let ps = [...Products]
+    let temp = [...cart]
+    p_ids.forEach(p_id => {
+      let resp = ps.find((e) => e.product.p_id === p_id).product
+    
+    let index = getProd(resp.id)
+    console.log(index)
+    if (resp) {
+      if (index != -1) {
+        let temp2 = { ...temp[index] }
+        if (temp2.quantity + 1 <= resp.quantity){
+          temp2.quantity += 1
+        }
+        
+        console.log(temp)
+        temp.splice(index, 1)
+        
+        temp.push(temp2)
+        //let t = document.getElementById(String(resp.id))
+        //t.value = resp.quantity
+        console.log('added')
+        addToast("Produit : " + resp.p_id + " est ajouté", {
+          appearance: "success",
+          autoDismiss: true,
+        });
+      } else {
+        console.log(`Resp `)
+        console.log(resp)
+        if (resp.quantity > 0){
+          let temp2 = {...resp,quantity:1}
+          temp.push(temp2);
+          addToast("Produit : " + resp.p_id + " est ajouté", {
+            appearance: "success",
+            autoDismiss: true,
+          });
+        }else{
+          addToast("Quantite insuffisente", {
+            appearance: "error",
+            autoDismiss: true,
+          });
+        }
+        
+        
+      }
+    }
+      
+    });
+    let tot = calculateTotal(temp)
+    updateTotal(tot,tot)
+    setCart(temp)
+  }
+
+  function addProduct(p_id) {
+    fetchProduct(p_id)
+  }
+
+
+  function addProducts() {
+    handleCartProduct(printIDs.map(e => e[1]))
+    setPrintIDs([]);
+
+  }
+
+  function afterSubmit() {
+    setCartOpen(false);
+    setPrintIDs([]);
+    updateProducts();
+  }
+
+  //
 
   const updateOptions = async () => {
     let resp = await req("option/");
@@ -791,8 +954,10 @@ function Stock(props) {
               {/* <th>Montant Payé</th> */}
               <th className="tel">Fournisseur</th>
               <th></th>
-              <th></th>
-              <th></th>
+              
+              
+              <th onClick={() => {addProducts()}}><FontAwesomeIcon icon={faCartPlus} className="trash" /></th>
+              <th onClick={() => {setCartOpen(true)}}><FontAwesomeIcon icon={faShoppingCart} className="trash" /></th>
               <th onClick={print}>
                 <FontAwesomeIcon icon={faPrint} className="trash" />{" "}
                 {/* <button className="factsubmit" id="submit">Imprimer</button> */}
@@ -889,6 +1054,18 @@ function Stock(props) {
 
   const html = (
     <Fragment>
+      {/** Cart modal */}
+      <Modal
+        open={cartOpen}
+        closeFunction={(v) => {
+          setCartOpen(false)
+        }}
+      >
+        <Cart products={cart} setProducts={setCart} submitOptions={submitOptions} setSubmitOptions={setSubmitOptions} calculateTotal={calculateTotal} fetchProduct={fetchProduct} updateTotal={updateTotal} afterSubmit={afterSubmit} />
+        
+      </Modal>
+
+      {/** end */}
       <Modal open={ConfirmOpen} closeFunction={setConfirm}>
         <h1 className="title-modal m20">
           {"Voulez-vous supprimer le produit " + modifyData.product.name + " ?"}
