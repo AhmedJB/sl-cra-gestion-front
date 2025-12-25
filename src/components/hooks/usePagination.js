@@ -4,10 +4,20 @@ function usePagination(data) {
 
 	const [seperated,setSeperated] = useState([]);
 	const [active,setActive] = useState(0);
+  /* useEffect(() => {
+    seperate();
+    setActive(0);
+  },[data]) */
+
+  useEffect(() => {
+    seperate();
+  }, [data]);
+
 	useEffect(() => {
-		seperate();
-		setActive(0);
-	},[data])
+		if (active >= seperated.length && seperated.length > 0) {
+			setActive(0);
+		}
+	}, [seperated]);
 
 	const seperate = () => {
 		const limit = 20;
@@ -43,9 +53,7 @@ function usePagination(data) {
 	
 
 
-
-
-  return [seperated,active,handleDirection]
+  return [seperated,active,handleDirection, setActive]
 }
 
 export default usePagination;

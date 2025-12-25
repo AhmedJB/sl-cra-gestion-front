@@ -105,9 +105,16 @@ function Cart({products,setProducts,submitOptions,setSubmitOptions,calculateTota
     }
     let p_id  = t.attributes.datapid.value
     let pr = await req('getproduct/' + String(p_id));
+    if (Number(val) > pr.quantity) {
+      addToast(`Stock limité : Quantité ajustée au maximum disponible (${pr.quantity})`, {
+        appearance: 'warning',
+        autoDismiss: true,
+      });
+    }
     let q = pr.quantity >= Number(val) ?  Number(val) : pr.quantity;
     t.value = q
   }
+
 
   async function handleChange(e) {
     let t = e.target
@@ -122,12 +129,22 @@ function Cart({products,setProducts,submitOptions,setSubmitOptions,calculateTota
     if (key == 'quantity'){
       //console.log(pr);
       let pr = await req('getproduct/' + String(p_id));
-      let q = pr.quantity >= Number(t.value) ?  Number(t.value) : pr.quantity;
-      //console.log('quantity',q);
-      temp[key] = q;
+      let requestedQt = Number(t.value);
+      if (requestedQt > pr.quantity) {
+        if (temp[key] !== pr.quantity) {
+          addToast(`Quantité ajustée : Le stock maximum disponible est de ${pr.quantity}`, {
+            appearance: "warning",
+            autoDismiss: true,
+          });
+        }
+        temp[key] = pr.quantity;
+      } else {
+        temp[key] = requestedQt;
+      }
     }else{
       temp[key] = Number(t.value);
     }
+
     copy[index] = temp
     let tot = calculateTotal(copy);
     updateTotal(tot,tot);

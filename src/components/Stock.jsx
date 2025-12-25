@@ -31,8 +31,10 @@ import {
   faSearch,
   faUpload,
   faShoppingCart,
-  faCartPlus
+  faCartPlus,
+  faChartLine
 } from "@fortawesome/free-solid-svg-icons";
+
 
 import CustomSelect from "./CustomSelect";
 import Checkbox from "@mui/material/Checkbox";
@@ -44,6 +46,8 @@ import stringSimilarity from "string-similarity";
 import UploadHandler from "./Utils/UploadHandler";
 import { sortByRatingDescending } from "../helper";
 import Cart from "./Cart";
+import PriceEvolution from "./Utils/PriceEvolution";
+
 
 function Stock(props) {
   const { addToast } = useToasts();
@@ -96,7 +100,12 @@ function Stock(props) {
     modePayment: 0
   });
   const [cartOpen,setCartOpen] = useState(false)
+  
+  const [priceOpen, setPriceOpen] = useState(false);
+  const [priceProdId, setPriceProdId] = useState(null);
+
   //***** end state  *******/
+
 
   const [Metal, setMetal] = useState([
     {
@@ -954,15 +963,16 @@ function Stock(props) {
               {/* <th>Montant Payé</th> */}
               <th className="tel">Fournisseur</th>
               <th></th>
-              
-              
-              <th onClick={() => {addProducts()}}><FontAwesomeIcon icon={faCartPlus} className="trash" /></th>
+              <th></th>
               <th onClick={() => {setCartOpen(true)}}><FontAwesomeIcon icon={faShoppingCart} className="trash" /></th>
+              <th></th>
+              <th></th>
               <th onClick={print}>
                 <FontAwesomeIcon icon={faPrint} className="trash" />{" "}
                 {/* <button className="factsubmit" id="submit">Imprimer</button> */}
               </th>
             </tr>
+
 
             {SeperatedProducts[active] &&
               SeperatedProducts[active].map((e, i) => {
@@ -1024,6 +1034,25 @@ function Stock(props) {
                     >
                       <FontAwesomeIcon icon={faUpload} className="trash" />
                     </td>
+                    <td
+                       className="edit"
+                       onClick={() => {
+                         addProduct(e.product.p_id);
+                       }}
+                    >
+                      <FontAwesomeIcon icon={faCartPlus} className="trash" />
+                    </td>
+                    <td
+
+                      className="edit"
+                      onClick={() => {
+                        setPriceProdId(e.product.id);
+                        setPriceOpen(true);
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faChartLine} className="trash" />
+                    </td>
+
                     <td
                       onClick={() => {
                         //del(e.product.p_id);
@@ -1101,6 +1130,18 @@ function Stock(props) {
         <h1 className="title-modal m20">Changement stock</h1>
         {changesProdId && <StockChange productId={changesProdId} />}
       </Modal>
+
+      <Modal
+        open={priceOpen}
+        closeFunction={(v) => {
+          setPriceProdId(null);
+          setPriceOpen(false);
+        }}
+      >
+        <h1 className="title-modal m20">Evolution prix</h1>
+        {priceProdId && <PriceEvolution productId={priceProdId} />}
+      </Modal>
+
 
       <Modal open={ModifyOpen} closeFunction={setModify}>
         <h1 className="title-modal m20">Modification de Produit</h1>

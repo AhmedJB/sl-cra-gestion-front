@@ -58,8 +58,10 @@ function HistoryV(props) {
     o_id: null,
     mode: null,
     paid: 0,
+    client_id: null, 
     details: [],
   });
+
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [Open, setOpen] = useState(false);
   const [Orders, setOrders] = useState([]);
@@ -116,7 +118,8 @@ function HistoryV(props) {
 
   // my new states
 
-  const [Seperated, active, handleDirection] = usePagination(Orders);
+  const [Seperated, active, handleDirection, setActive] = usePagination(Orders);
+
   const [fetchLoading, setFetchLoading] = useState(true);
 
   // addition states
@@ -290,8 +293,10 @@ function HistoryV(props) {
     startdate = null,
     enddate = null,
     newc = null,
-    newid = null
+    newid = null,
+    resetPage = false
   ) {
+
     let clientFilt = newc === "" ? newc : filteredClient;
     let idFilt = newid === "" ? newid : filteredID;
     setFetchLoading(true);
@@ -324,7 +329,11 @@ function HistoryV(props) {
       console.log(temp);
       setOrders(temp);
       setBackUpOrders(resp);
+      if (resetPage) {
+        setActive(0);
+      }
     }
+
   }
 
   async function filter(v, fromUpdate = false) {
@@ -345,11 +354,13 @@ function HistoryV(props) {
       if (v != filteredClient) {
         setFilteredClient(v);
         setOrders(d);
+        setActive(0); 
       }
     } else {
       setFilteredClient(null);
-      await updateOrders(null, null, "", null);
+      await updateOrders(null, null, "", null, true);
     }
+
   }
 
   async function download(e) {
@@ -451,8 +462,10 @@ function HistoryV(props) {
         mode: order.order.mode,
         transport: order.order.transport,
         paid: order.order.paid,
+        client_id: order.client.id,
         details: order.details,
       };
+
       let d = {
         client: order.client,
         order: {
@@ -477,12 +490,21 @@ function HistoryV(props) {
     c.mode = v[0].id;
     setDetails(c);
   }
+  function handleClientChange(v) {
+    let c = { ...Details };
+    if (v && v.length > 0) {
+       c.client_id = v[0].id;
+    }
+    setDetails(c);
+  }
+
   function handleTransport(v) {
     console.log(v);
     let c = { ...Details };
     c.transport = v[0].name;
     setDetails(c);
   }
+
 
   function getDet(id) {
     console.log(id);
@@ -572,7 +594,9 @@ function HistoryV(props) {
       deleted: DeletedOrder.details,
       ret: DeletedOrder.order.ret,
       date: DeletedOrder.order.date,
+      client_id: Details.client_id, 
     };
+
 
     let resp = await postReq("modorder", body);
     if (resp) {
@@ -650,11 +674,13 @@ function HistoryV(props) {
       if (v != filterID) {
         setFilteredID(v);
         setOrders(d);
+        setActive(0);
       }
     } else {
       setFilteredID(null);
-      await updateOrders(null, null, null, "");
+      await updateOrders(null, null, null, "", true);
     }
+
   }
 
   function round(num) {
@@ -1328,6 +1354,19 @@ function HistoryV(props) {
           />
         </div>
         <div className="modal-input-row">
+            <CustomSelect
+            options={Data.Clients}
+            changeFunc={handleClientChange}
+            label="name"
+            multi={false}
+            values={Data.Clients.filter((e) => e.id == Details.client_id)}
+            fvalue="id"
+            placeholder="Changer le client"
+            searchBy="name"
+          />
+        </div>
+        <div className="modal-input-row">
+
           <CustomSelect
             options={transportOptions}
             changeFunc={handleTransport}
