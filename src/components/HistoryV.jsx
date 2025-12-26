@@ -244,7 +244,7 @@ function HistoryV(props) {
         setUser(obj);
         await updateClients();
         await updateOrders();
-        await getProducts();
+        // await getProducts();
         await updateTransport();
         return obj;
       } else {
@@ -489,6 +489,9 @@ function HistoryV(props) {
       setDetails(b);
       setDeleted(d);
       setOpen(true);
+      if (products.length === 0) {
+        getProducts();
+      }
     } else {
       setOpen(false);
     }

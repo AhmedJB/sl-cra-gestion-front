@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import CustomSelect from "../CustomSelect";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrashAlt, faCheck } from "@fortawesome/free-solid-svg-icons";
@@ -30,18 +30,18 @@ function AdditionRow({ products, details, deleteFromList, orderID, updateOrders 
     t.value = val;
   }
 
-  function getarray(key1) {
+  const productOptions = useMemo(() => {
     let arr = [];
     for (let i = 0; i < products.length; i++) {
-      let temp = products[i][key1];
+      let temp = { ...products[i].product };
       let found = false;
       let q = temp.quantity;
       for (let j = arr.length - 1; j >= 0; j--) {
-        if (arr[j].name == temp.name && !found) {
+        if (arr[j].name === temp.name && !found) {
           q += arr[j].total_quantity;
           found = true;
         }
-        if (arr[j].name == temp.name) {
+        if (arr[j].name === temp.name) {
           arr[j].total_quantity = q;
           arr[j].total_name = arr[j].name + " (" + q + ")";
         }
@@ -50,9 +50,8 @@ function AdditionRow({ products, details, deleteFromList, orderID, updateOrders 
       temp.total_name = temp.name + " (" + q + ")";
       arr.push(temp);
     }
-    console.log(arr);
     return arr;
-  }
+  }, [products]);
 
   const handleSelectChange = (nv) => {
     if (nv.length > 0) {
@@ -120,7 +119,7 @@ function AdditionRow({ products, details, deleteFromList, orderID, updateOrders 
     <tr>
       <td className="date">
         <CustomSelect
-          options={getarray("product")}
+          options={productOptions}
           changeFunc={handleSelectChange}
           label="total_name"
           multi={false}

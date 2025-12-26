@@ -4,6 +4,7 @@ import React, {
   useContext,
   Fragment,
   useCallback,
+  useMemo,
   useRef,
 } from "react";
 import { UserContext } from "../contexts/UserContext";
@@ -448,7 +449,6 @@ function Stock(props) {
   async function updateData() {
     let supResp = await req("provider");
     let pResp = await req(`product?page=${currentPage}&page_size=${pageSize}`);
-    let silentResp = await req("silentpd");
     let obj2 = { ...Data };
     obj2.Suppliers = supResp;
     if (pResp && pResp.results) {
@@ -456,11 +456,17 @@ function Stock(props) {
       setProduct(pResp.results);
       setPaginationData(pResp);
     }
-    if (silentResp) {
-      setAllProducts(silentResp);
-      obj2.AllProducts = silentResp;
-    }
     setData(obj2);
+
+    // Background fetch for search data if not already present
+    if (!allProducts || allProducts.length === 0) {
+      req("silentpd").then((silentResp) => {
+        if (silentResp) {
+          setAllProducts(silentResp);
+          setData((prev) => ({ ...prev, AllProducts: silentResp }));
+        }
+      });
+    }
     return true;
   }
 
@@ -640,19 +646,19 @@ function Stock(props) {
     }
   }
 
-  function getarray(key1) {
+  const productDropdownOptions = useMemo(() => {
     let arr = [];
     let source = allProducts.length > 0 ? allProducts : Products;
     for (let i = 0; i < source.length; i++) {
-      let temp = source[i][key1];
+      let temp = { ...source[i].product };
       let found = false;
       let q = temp.quantity;
       for (let j = arr.length - 1; j >= 0; j--) {
-        if (arr[j].name == temp.name && !found) {
+        if (arr[j].name === temp.name && !found) {
           q += arr[j].total_quantity;
           found = true;
         }
-        if (arr[j].name == temp.name) {
+        if (arr[j].name === temp.name) {
           arr[j].total_quantity = q;
           arr[j].total_name = arr[j].name + " (" + q + ")";
         }
@@ -661,9 +667,8 @@ function Stock(props) {
       temp.total_name = temp.name + " (" + q + ")";
       arr.push(temp);
     }
-    //console.log(arr);
     return arr;
-  }
+  }, [allProducts, Products]);
 
   function filterCat(cs) {
     setFetchLoading(true);
@@ -1473,7 +1478,7 @@ function Stock(props) {
                 {/* <CustomSelect options={Place} changeFunc={filterPlace}
         label="name" fvalue="value" placeholder="Choisir une Place" /> */}
                 <CustomSelect
-                  options={getarray("product")}
+                  options={productDropdownOptions}
                   changeFunc={filterProduct}
                   label="p_id"
                   fvalue="p_id"
@@ -1482,7 +1487,7 @@ function Stock(props) {
                   values={selectID}
                 />
                 <CustomSelect
-                  options={getarray("product")}
+                  options={productDropdownOptions}
                   changeFunc={filterProductName}
                   label="total_name"
                   fvalue="p_id"
