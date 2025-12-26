@@ -3,6 +3,7 @@ import React, {
   useEffect,
   useContext,
   Fragment,
+  useCallback,
   useRef,
 } from "react";
 import { UserContext } from "../contexts/UserContext";
@@ -39,7 +40,7 @@ import {
 import CustomSelect from "./CustomSelect";
 import Checkbox from "@mui/material/Checkbox";
 import Modal from "./Modal";
-import usePagination from "./hooks/usePagination";
+import useServerPagination from "./hooks/useServerPagination";
 import Pagination from "./Utils/Pagination";
 import StockChange from "./Utils/StockChange";
 import stringSimilarity from "string-similarity";
@@ -92,6 +93,7 @@ function Stock(props) {
   const [changesOpen, setChangesOpen] = useState(false);
   const [changesProdId, setChangesProdId] = useState(null);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [allProducts, setAllProducts] = useState([]);
   // cart state
   const [cart,setCart] = useState([]);
   const [submitOptions, setSubmitOptions] = useState({
@@ -390,7 +392,20 @@ function Stock(props) {
     setActive(0);
   },[Products])*/
 
-  const [SeperatedProducts, active, handleDirection] = usePagination(Products);
+  const {
+    currentPage,
+    pageSize,
+    totalPages,
+    totalCount,
+    handlePageChange,
+    setPaginationData,
+    setCurrentPage,
+  } = useServerPagination(20);
+
+  const handlePaginationDirection = (step) => {
+    handlePageChange(step);
+    updateProducts(currentPage + step);
+  }
 
   const initiated = useRef(false);
   useEffect(() => {
@@ -416,26 +431,36 @@ function Stock(props) {
     }
   }, [Products]);
 
-  async function updateProducts() {
+  async function updateProducts(page = currentPage) {
     setLoadingSubmit(true);
-    let pResp = await req("product");
-    let obj = { ...Data };
-    obj.Products = pResp;
-    //console.log("updating products");
-    setProduct(pResp);
-    setData(obj);
+    let pResp = await req(`product?page=${page}&page_size=${pageSize}`);
+    if (pResp && pResp.results) {
+      let obj = { ...Data };
+      obj.Products = pResp.results;
+      setProduct(pResp.results);
+      setData(obj);
+      setPaginationData(pResp);
+    }
     setLoadingSubmit(false);
     return true;
   }
 
   async function updateData() {
     let supResp = await req("provider");
-    let Prods = await req("product");
+    let pResp = await req(`product?page=${currentPage}&page_size=${pageSize}`);
+    let silentResp = await req("silentpd");
     let obj2 = { ...Data };
     obj2.Suppliers = supResp;
-    obj2.Products = Prods;
+    if (pResp && pResp.results) {
+      obj2.Products = pResp.results;
+      setProduct(pResp.results);
+      setPaginationData(pResp);
+    }
+    if (silentResp) {
+      setAllProducts(silentResp);
+      obj2.AllProducts = silentResp;
+    }
     setData(obj2);
-    setProduct(Prods);
     return true;
   }
 
@@ -617,8 +642,9 @@ function Stock(props) {
 
   function getarray(key1) {
     let arr = [];
-    for (let i = 0; i < Products.length; i++) {
-      let temp = Products[i][key1];
+    let source = allProducts.length > 0 ? allProducts : Products;
+    for (let i = 0; i < source.length; i++) {
+      let temp = source[i][key1];
       let found = false;
       let q = temp.quantity;
       for (let j = arr.length - 1; j >= 0; j--) {
@@ -648,7 +674,7 @@ function Stock(props) {
     } else {
       let arr = [];
       let v = cs[0];
-      let produits = Data.Products;
+      let produits = allProducts.length > 0 ? allProducts : Data.Products;
       for (let i = 0; i < produits.length; i++) {
         if (produits[i].product.ptype == v.value) {
           arr.push(produits[i]);
@@ -667,7 +693,7 @@ function Stock(props) {
     } else {
       let arr = [];
       let v = vs[0];
-      let produits = Data.Products;
+      let produits = allProducts.length > 0 ? allProducts : Data.Products;
       for (let i = 0; i < produits.length; i++) {
         if (produits[i].product.p_id == v.p_id) {
           arr.push(produits[i]);
@@ -686,7 +712,7 @@ function Stock(props) {
     } else {
       let arr = [];
       let v = vs[0];
-      let produits = Data.Products;
+      let produits = allProducts.length > 0 ? allProducts : Data.Products;
       for (let i = 0; i < produits.length; i++) {
         if (produits[i].product.name == v.name) {
           arr.push(produits[i]);
@@ -705,7 +731,7 @@ function Stock(props) {
     } else {
       let arr = [];
       let f = fs[0];
-      let produits = Data.Products;
+      let produits = allProducts.length > 0 ? allProducts : Data.Products;
       for (let i = 0; i < produits.length; i++) {
         if (produits[i].fournisseur.id == f.id) {
           arr.push(produits[i]);
@@ -974,8 +1000,8 @@ function Stock(props) {
             </tr>
 
 
-            {SeperatedProducts[active] &&
-              SeperatedProducts[active].map((e, i) => {
+            {Products &&
+              Products.map((e, i) => {
                 ////console.log(e);
                 return (
                   <tr key={`stock-f-${i}`}>
@@ -1487,9 +1513,10 @@ function Stock(props) {
             {Products.length == 0 ? NotFound : DataTable}
             <Pagination
               data={Products}
-              seperated={SeperatedProducts}
-              handleDirection={handleDirection}
-              active={active}
+              isServerSide={true}
+              total_pages={totalPages}
+              current_page={currentPage}
+              handleDirection={handlePaginationDirection}
             />
           </>
         )}

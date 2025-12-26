@@ -4,6 +4,8 @@ import React, {
   useContext,
   Fragment,
   useRef,
+  useMemo,
+  useCallback,
 } from "react";
 import { UserContext } from "../contexts/UserContext";
 import { DataContext } from "../contexts/DataContext";
@@ -38,7 +40,7 @@ import Modal from "./Modal";
 import "../static/frontend/invoice.css";
 import CustomSelect from "./CustomSelect";
 import { makePDF } from "multi-page-html2pdf";
-import usePagination from "./hooks/usePagination";
+import useServerPagination from "./hooks/useServerPagination";
 import Pagination from "./Utils/Pagination";
 import AdditionRow from "./Utils/AdditionRow";
 import Logo1 from "../static/pics/LOGO-1.png";
@@ -118,7 +120,20 @@ function HistoryV(props) {
 
   // my new states
 
-  const [Seperated, active, handleDirection, setActive] = usePagination(Orders);
+  const {
+    currentPage,
+    pageSize,
+    totalPages,
+    totalCount,
+    handlePageChange,
+    setPaginationData,
+    setCurrentPage,
+  } = useServerPagination(20);
+
+  const handlePaginationDirection = (step) => {
+    handlePageChange(step);
+    updateOrders(null, null, null, null, false, currentPage + step);
+  }
 
   const [fetchLoading, setFetchLoading] = useState(true);
 
@@ -213,7 +228,7 @@ function HistoryV(props) {
   });
 
   const getProducts = async () => {
-    let Prods = await req("product");
+    let Prods = await req("silentpd");
     setProducts(Prods);
   };
 
@@ -294,9 +309,9 @@ function HistoryV(props) {
     enddate = null,
     newc = null,
     newid = null,
-    resetPage = false
+    resetPage = false,
+    page = currentPage
   ) {
-
     let clientFilt = newc === "" ? newc : filteredClient;
     let idFilt = newid === "" ? newid : filteredID;
     setFetchLoading(true);
@@ -312,28 +327,23 @@ function HistoryV(props) {
       startdate,
       enddate,
     };
-    let resp = await postReq("filterorder", body);
+    let resp = await postReq(`filterorder?page=${page}&page_size=${pageSize}`, body);
     if (resp) {
-      console.log("############### Fitered states #################");
-      console.log(newc);
-      console.log(newid);
-      console.log("#####################################");
-      let temp = resp;
-      if (clientFilt && clientFilt != "") {
-        temp = await filter(clientFilt, true);
+      let data = resp.results ? resp.results : resp;
+      let temp = data;
+      if (clientFilt && clientFilt !== "") {
+        temp = data.filter((e) => clientFilt.some(f => f.id === e.client.id));
       }
-      if (idFilt && idFilt != "") {
-        temp = await filterID(idFilt, true);
+      if (idFilt && idFilt !== "") {
+        temp = data.filter((e) => idFilt.some(f => f.id === e.order.id));
       }
-      console.log(resp);
-      console.log(temp);
       setOrders(temp);
-      setBackUpOrders(resp);
-      if (resetPage) {
-        setActive(0);
+      setBackUpOrders(data);
+      if (resp.results) {
+        setPaginationData(resp);
       }
     }
-
+    setFetchLoading(false);
   }
 
   async function filter(v, fromUpdate = false) {
@@ -354,7 +364,7 @@ function HistoryV(props) {
       if (v != filteredClient) {
         setFilteredClient(v);
         setOrders(d);
-        setActive(0); 
+        setCurrentPage(1);
       }
     } else {
       setFilteredClient(null);
@@ -674,7 +684,7 @@ function HistoryV(props) {
       if (v != filterID) {
         setFilteredID(v);
         setOrders(d);
-        setActive(0);
+        setCurrentPage(1);
       }
     } else {
       setFilteredID(null);
@@ -726,10 +736,10 @@ function HistoryV(props) {
     }
   };
 
-  const bon = SelectedOrder.details.map((order, i) => {
+  const bon = useMemo(() => SelectedOrder.details.map((order, i) => {
     return (
       <div
-        key={SelectedOrder.order.o_id}
+        key={SelectedOrder.order.o_id + '-' + i}
         id="invoice"
         className="page"
         size="A4"
@@ -791,7 +801,7 @@ function HistoryV(props) {
               <tbody>
                 {order.details.map((e,i) => {
                   return (
-                    <tr>
+                    <tr key={e.id || i}>
                       <td>{i+1}</td>
                       <td>
                         <div className="media">
@@ -801,8 +811,8 @@ function HistoryV(props) {
                         </div>
                       </td>
                       <td>{e.quantity}</td>
-                      <td>{e.prix}DH</td>
-                      <td>{e.prix * e.quantity}DH</td>
+                      <td>{e.prix}</td>
+                      <td>{round(Number(e.quantity) * Number(e.prix))}</td>
                     </tr>
                   );
                 })}
@@ -872,7 +882,7 @@ function HistoryV(props) {
         </div>
       </div>
     );
-  });
+  }), [SelectedOrder]);
 
   const fac_avoir = (
     <div id="invoice" className="page" size="A4">
@@ -1219,7 +1229,7 @@ function HistoryV(props) {
     );
   });
 
-  const DataTable = (
+  const DataTable = useMemo(() => (
     <Fragment>
       {SelectedOrder.order.o_id ? (
         <div id="exportPdf">
@@ -1243,9 +1253,9 @@ function HistoryV(props) {
           <tbody>
             <tr>
               <th className="date">N&deg; Commande</th>
-              <th classname="task-title">Client</th>
-              <th classname="tel">Total</th>
-              <th classname="tel">Credit</th>
+              <th className="task-title">Client</th>
+              <th className="tel">Total</th>
+              <th className="tel">Credit</th>
               <th>Mode Paiement</th>
               <th>Transport</th>
               <th>Date</th>
@@ -1254,19 +1264,19 @@ function HistoryV(props) {
               <th></th>
             </tr>
 
-            {Seperated[active] &&
-              Seperated[active].map((e) => {
+            {Orders &&
+              Orders.map((e, i) => {
                 return (
-                  <tr>
+                  <tr key={e.order.id}>
                     <td className="date">{e.order.o_id}</td>
                     <td>{e.client.name}</td>
-                    <td>{e.order.total + "DH"}</td>
+                    <td>{e.order.total + " DH"}</td>
                     <td>
-                      {Number(e.order.total) - Number(e.order.paid) + "DH"}
+                      {Number(e.order.total) - Number(e.order.paid) + " DH"}
                     </td>
                     <td>{getOption(e.order.mode)}</td>
                     <td>{e.order.transport}</td>
-                    <td className="task-title">
+                    <td>
                       {new Date(e.order.date).toLocaleDateString(
                         "fr-FR",
                         options
@@ -1307,7 +1317,7 @@ function HistoryV(props) {
         </table>
       </div>
     </Fragment>
-  );
+  ), [Orders, options, getOption, setOrderDetails, download]);
   const subLoader = <><div className="lds-facebook">
   <div />
   <div />
@@ -1559,9 +1569,10 @@ function HistoryV(props) {
             {Orders.length == 0 ? NotFound : DataTable}
             <Pagination
               data={Orders}
-              seperated={Seperated}
-              handleDirection={handleDirection}
-              active={active}
+              isServerSide={true}
+              total_pages={totalPages}
+              current_page={currentPage}
+              handleDirection={handlePaginationDirection}
             />
           </>
         )}

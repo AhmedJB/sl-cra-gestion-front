@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, Fragment } from "react";
+import React, { useState, useEffect, useContext, Fragment, useMemo, useCallback } from "react";
 import { UserContext } from "../contexts/UserContext";
 import { DataContext } from "../contexts/DataContext";
 import { isLogged, req, download_file } from "../helper";
@@ -374,7 +374,7 @@ function Pannel(props) {
     ]);
   };
 
-  const handleChangeProduct =  (vs) => {
+  const handleChangeProduct = useCallback((vs) => {
     console.log(vs)
     let pr = null;
     if (vs.length > 0){
@@ -384,8 +384,7 @@ function Pannel(props) {
       setSelectedSaleProduct(Object.keys(saleData)[0])
       pr = Object.keys(saleData)[0];
     }
-    
-  }
+  }, [saleData]);
 
   useEffect(()  => {
     if  (selectedSaleProduct && selectedSaleProduct.length > 0 && saleData){
@@ -435,7 +434,7 @@ function Pannel(props) {
     setData(obj2);
   }
 
-  async function loadSupplierLine(vs) {
+  const loadSupplierLine = useCallback(async (vs) => {
     let series = [181, 500];
     let cats = ["2021-09-28T21:32:46.038306Z", "2021-09-28T23:49:15.267100Z"];
     if (vs.length != 0) {
@@ -456,9 +455,9 @@ function Pannel(props) {
     setProviderLineOption(temp);
     temp2[0].data = series;
     setProviderLineSeries(temp2);
-  }
+  }, [ProviderLineOptions, ProviderLineSeries]);
 
-  async function loadClientLine(vs) {
+  const loadClientLine = useCallback(async (vs) => {
     let series = [181, 500];
     let cats = ["2021-09-28T21:32:46.038306Z", "2021-09-28T23:49:15.267100Z"];
     if (vs.length != 0) {
@@ -479,7 +478,7 @@ function Pannel(props) {
     setClientLineOption(temp);
     temp2[0].data = series;
     setClientLineSeries(temp2);
-  }
+  }, [clientLineOptions, clientLineSeries]);
 
 
   const [topProducts, setTopProducts] = useState([]); // State to store fetched data
@@ -559,7 +558,7 @@ function Pannel(props) {
     min-height: ${(props) => props.minHeight};
   `;
 
-  const salesChart = (
+  const salesChart = useMemo(() => (
     <div className="row">
       <Card width="90%" height="auto" minHeight="500px">
         <div className="title-select-row">
@@ -598,13 +597,11 @@ function Pannel(props) {
               type="line"
               height="400"
             />
-        
-       
       </Card>
     </div>
-  );
+  ), [saleData, selectedSaleProduct, chartTopSeries, chartTopOptions, chartSellOptions, chartSellSeries, chartSellLineOptions, chartSellLineSeries, handleChangeProduct]);
 
-  const overview = (
+  const overview = useMemo(() => (
     <div className="row">
       <Card width="450px" height="260px">
         <h3 className="card-title text-center">Ventes</h3>
@@ -649,7 +646,7 @@ function Pannel(props) {
         </div>
       </Card>
     </div>
-  );
+  ), [stable]);
 
   const top5chart = (
     <div className="row">
@@ -664,7 +661,7 @@ function Pannel(props) {
     </div>
   )
 
-  const supplierChart = (
+  const supplierChart = useMemo(() => (
     <div className="row">
       <Card width="90%" height="auto" minHeight="500px">
         <div className="title-select-row">
@@ -705,9 +702,9 @@ function Pannel(props) {
         </div>
       </Card>
     </div>
-  );
+  ), [Data.Suppliers, loadSupplierLine, selectedProvider, ProviderLineOptions, ProviderLineSeries, ProviderPieOptions, ProviderPieSeries]);
 
-  const clientChart = (
+  const clientChart = useMemo(() => (
     <div className="row">
       <Card width="90%" height="auto" minHeight="500px">
         <div className="title-select-row">
@@ -747,7 +744,7 @@ function Pannel(props) {
         </div>
       </Card>
     </div>
-  );
+  ), [Data.Clients, loadClientLine, selectedClient, clientLineOptions, clientLineSeries, clientPieOptions, clientPieSeries]);
 
   const profitChart = (
     <div className="row">
