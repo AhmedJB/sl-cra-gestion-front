@@ -312,8 +312,8 @@ function HistoryV(props) {
     resetPage = false,
     page = currentPage
   ) {
-    let clientFilt = newc === "" ? newc : filteredClient;
-    let idFilt = newid === "" ? newid : filteredID;
+    let clientFilt = newc === "" ? null : newc !== null ? newc : filteredClient;
+    let idFilt = newid === "" ? null : newid !== null ? newid : filteredID;
     setFetchLoading(true);
     if (!startdate) {
       startdate = startDate;
@@ -326,14 +326,15 @@ function HistoryV(props) {
     let body = {
       startdate,
       enddate,
+      client: clientFilt && clientFilt.length > 0 ? clientFilt[0].id : "all"
     };
     let resp = await postReq(`filterorder?page=${page}&page_size=${pageSize}`, body);
     if (resp) {
       let data = resp.results ? resp.results : resp;
       let temp = data;
-      if (clientFilt && clientFilt !== "") {
+      /* if (clientFilt && clientFilt !== "") {
         temp = data.filter((e) => clientFilt.some(f => f.id === e.client.id));
-      }
+      } */
       if (idFilt && idFilt !== "") {
         temp = data.filter((e) => idFilt.some(f => f.id === e.order.id));
       }
@@ -347,30 +348,32 @@ function HistoryV(props) {
   }
 
   async function filter(v, fromUpdate = false) {
-    var d = [];
-    if (v && v != "") {
-      let temp;
-      for (let i = 0; i < v.length; i++) {
-        temp = BackUpOrders.filter((e) => e.client.id == v[i].id);
-        for (let i = 0; i < temp.length; i++) {
-          //console.log(temp);
-          d.push(temp[i]);
+    if (fromUpdate) {
+      // old logic kept for compatibility if needed elsewhere but not used in normal flow
+      var d = [];
+      if (v && v != "") {
+        let temp;
+        for (let i = 0; i < v.length; i++) {
+          temp = BackUpOrders.filter((e) => e.client.id == v[i].id);
+          for (let i = 0; i < temp.length; i++) {
+            d.push(temp[i]);
+          }
         }
-      }
-      console.log(d);
-      if (fromUpdate) {
         return d;
       }
+    }
+
+    if (v && v != "") {
       if (v != filteredClient) {
         setFilteredClient(v);
-        setOrders(d);
         setCurrentPage(1);
+        await updateOrders(null, null, v, null, true, 1);
       }
     } else {
       setFilteredClient(null);
-      await updateOrders(null, null, "", null, true);
+      setCurrentPage(1);
+      await updateOrders(null, null, "", null, true, 1);
     }
-
   }
 
   async function download(e) {

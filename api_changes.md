@@ -34,6 +34,15 @@ The response is now wrapped in a pagination object.
 
 ## Endpoint: `/api/filterorder` (POST)
 
+### Payload (Body)
+```json
+{
+  "startdate": "2023-01-01",
+  "enddate": "2023-12-31",
+  "client": 12            // (Optional) Client ID (Integer) to filter by. Use "all" or omit to show all clients.
+}
+```
+
 ### New Parameters (Query Params)
 - `page` (int, optional): The page number to fetch. Defaults to `1`.
 - `page_size` (int, optional): Number of items per page. Defaults to `20`.
