@@ -1,8 +1,9 @@
 import * as React from "react";
+import { useContext } from "react";
 import { motion } from "framer-motion";
 import { MenuItem } from "./MenuItem";
 import { BrandItem } from "./BrandItem";
-import { useDimensions } from "./use-dimensions";
+import { UserContext } from "../contexts/UserContext";
 
 const variants = {
   open: {
@@ -13,29 +14,38 @@ const variants = {
   },
 };
 
-/* const itemIds = [0,1,2,3,4]; */
-const itemIds = [0, 1, 2, 3, 4, 5];
+// Standard inventory items
+const inventoryIds = [0, 1, 2, 3, 4, 5];
+// Accounting-only items
+const accountingIds = [7, 8, 9, 10];
 
 export const Navigation = (props) => {
   const ref = React.useRef(null);
-  React.useEffect(() => {
-    console.log("runing");
-    if (ref.current) {
-      //let {h} = useDimensions(ref);
-      let t = ref.current;
-      let h = t.offsetHeight;
-      console.log(h);
-      //console.log(h);
-      //props.setH(h);
-    }
-  });
+  const [User, setUser] = useContext(UserContext);
+
+  const isAccountingUser = User && User.is_accounting_user;
 
   return (
     <motion.ul id="content-nav-container" ref={ref} variants={variants}>
       <BrandItem />
-      {itemIds.map((i) => (
-        <MenuItem i={i} key={i} />
-      ))}
+      
+      {/* Accounting users: show ONLY accounting items */}
+      {isAccountingUser ? (
+        <React.Fragment>
+          {accountingIds.map((i) => (
+            <MenuItem i={i} key={i} />
+          ))}
+        </React.Fragment>
+      ) : (
+        /* Normal users: show inventory items */
+        <React.Fragment>
+          {inventoryIds.map((i) => (
+            <MenuItem i={i} key={i} />
+          ))}
+        </React.Fragment>
+      )}
+
+      {/* Logout — always last */}
       <MenuItem i={6} key={6} />
     </motion.ul>
   );

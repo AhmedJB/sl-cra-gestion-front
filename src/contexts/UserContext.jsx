@@ -8,7 +8,8 @@ export const UserProvider = props => {
     let obj = {
         logged : false,
         username : null,
-        email : null
+        email : null,
+        is_accounting_user: true
     }
     
     const [user,setUser] = useState(obj);

@@ -22,6 +22,13 @@ import HistoryV from "./HistoryV";
 import DateFnsUtils from "@date-io/date-fns";
 import frLocale from "date-fns/locale/fr";
 
+// Accounting components
+import AccountingDashboard from "./accounting/AccountingDashboard";
+import AccountingInvoices from "./accounting/AccountingInvoices";
+
+import AccountingFiscalYears from "./accounting/AccountingFiscalYears";
+import AccountingStock from "./accounting/AccountingStock";
+
 const App = (props) => {
   const base = "/appfront/app";
 
@@ -61,6 +68,25 @@ const App = (props) => {
                 <Route
                   path={base + "/historyv"}
                   render={(props) => <HistoryV {...props} />}
+                ></Route>
+
+                {/* Accounting Routes */}
+                <Route
+                  path={base + "/accounting/invoices"}
+                  render={(props) => <AccountingInvoices {...props} />}
+                ></Route>
+
+                <Route
+                  path={base + "/accounting/fiscal-years"}
+                  render={(props) => <AccountingFiscalYears {...props} />}
+                ></Route>
+                <Route
+                  path={base + "/accounting/stock"}
+                  render={(props) => <AccountingStock {...props} />}
+                ></Route>
+                <Route
+                  path={base + "/accounting"}
+                  render={(props) => <AccountingDashboard {...props} />}
                 ></Route>
 
                 <Route

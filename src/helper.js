@@ -3,8 +3,8 @@ import axios from "axios";
 import { target_store } from "./config";
 
 //const base_url = "http://85.31.236.214/gestionapp";
-const base_url = target_store === 1 ? "http://85.31.236.214/gestionapp" : "http://85.31.236.214:8080/gestionapp";
-//const base_url = "http://127.0.0.1:8000";
+//const base_url = target_store === 1 ? "http://85.31.236.214/gestionapp" : "http://85.31.236.214:8080/gestionapp";
+const base_url = "http://127.0.0.1:8000";
 const api = base_url + "/api/";
 
 //var fileDownload = require('js-file-download');
@@ -45,7 +45,7 @@ export async function get_token(username = null, password = null) {
     headers: headers,
   };
 
-  let preResp = await fetch(api + "token", options);
+  let preResp = await fetch(api + "token/", options);
   if (preResp.ok) {
     //console.log('got token');
     var resp = await preResp.json();
@@ -75,7 +75,7 @@ export async function register(username = null, email = null, password = null) {
     headers: headers,
   };
 
-  let preResp = await fetch(api + "register", options);
+  let preResp = await fetch(api + "register/", options);
 
   if (preResp.ok) {
     let nextresp = await get_token(username, password);
@@ -96,7 +96,7 @@ export async function refreshToken() {
     headers: headers,
   };
 
-  let preResp = await fetch(api + "token/refresh", options);
+  let preResp = await fetch(api + "token/refresh/", options);
   if (preResp.ok) {
     let resp = await preResp.json();
     let access = resp.access;
@@ -141,7 +141,22 @@ export async function set_vidiq_account(url, username = null, password = null) {
   }
 }
 
+function formatUrl(url) {
+  if (!url.includes("?")) {
+    return url.endsWith("/") ? url : url + "/";
+  } else {
+    let parts = url.split("?");
+    let path = parts[0];
+    let query = parts.slice(1).join("?");
+    if (!path.endsWith("/")) {
+      path += "/";
+    }
+    return path + "?" + query;
+  }
+}
+
 export async function postReq(url, body) {
+  url = formatUrl(url);
   let access = sessionStorage.getItem("accessToken");
   let headers = set_header(access);
 
@@ -170,6 +185,32 @@ export async function postReq(url, body) {
     }
   } else {
     //console.log('other errors');
+    return false;
+  }
+}
+
+export async function patchReq(url, body) {
+  let access = sessionStorage.getItem("accessToken");
+  let headers = set_header(access);
+
+  let options = {
+    method: "PATCH",
+    body: JSON.stringify(body),
+    headers: headers,
+  };
+
+  let preResp = await fetch(api + url, options);
+  if (preResp.ok) {
+    let resp = await preResp.json();
+    return resp;
+  } else if (preResp.status == 401) {
+    let dec = await refreshToken();
+    if (dec) {
+      return patchReq(url, body);
+    } else {
+      return false;
+    }
+  } else {
     return false;
   }
 }
@@ -230,6 +271,7 @@ export async function download_file(url, name) {
 }
 
 export async function req(url) {
+  url = formatUrl(url);
   let access = sessionStorage.getItem("accessToken");
   let headers = set_header(access);
 
@@ -256,6 +298,7 @@ export async function req(url) {
 }
 
 export async function req_body(url, body) {
+  url = formatUrl(url);
   let access = sessionStorage.getItem("accessToken");
   let headers = set_header(access);
 

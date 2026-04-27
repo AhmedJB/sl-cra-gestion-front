@@ -8,7 +8,9 @@ export const DataProvider = props => {
     let obj = {
         Suppliers : [],
         Products : [],
-        Clients : []
+        Clients : [],
+        FiscalYears: [],
+        SelectedFiscalYear: null
     }
     
     const [Data,setData] = useState(obj);

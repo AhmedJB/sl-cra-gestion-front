@@ -1105,3 +1105,48 @@ and (orientation : portrait) {
     font-size:5em;
 
 }
+
+.accounting-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    line-height: 1.4;
+}
+
+.accounting-badge.paid {
+    background-color: rgba(69, 244, 69, 0.15);
+    color: var(--green);
+    border: 1px solid rgba(69, 244, 69, 0.4);
+}
+
+.accounting-badge.partial {
+    background-color: rgba(255, 193, 7, 0.15);
+    color: #ffc107;
+    border: 1px solid rgba(255, 193, 7, 0.4);
+}
+
+.accounting-badge.unpaid {
+    background-color: rgba(247, 73, 73, 0.15);
+    color: var(--red);
+    border: 1px solid rgba(247, 73, 73, 0.4);
+}
+
+.title-select-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.title-select-row .inline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}

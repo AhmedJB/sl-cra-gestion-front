@@ -11,6 +11,11 @@ import {
   faSignOutAlt,
   faTachometerAlt,
   faUsers,
+  faChartPie,
+  faFileInvoiceDollar,
+  faMoneyCheckAlt,
+  faCalendarAlt,
+  faWarehouse,
 } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 
@@ -39,6 +44,11 @@ const colors = [
   "#7700FF",
   "#6029f5",
   "#4400FF",
+  "#00C9A7",
+  "#00B4D8",
+  "#0096C7",
+  "#0077B6",
+  "#00D4AA",
 ];
 const icons = [
   <FontAwesomeIcon icon={faTachometerAlt} />,
@@ -48,6 +58,10 @@ const icons = [
   <FontAwesomeIcon icon={faFileInvoice} />,
   <FontAwesomeIcon icon={faHistory}></FontAwesomeIcon>,
   <FontAwesomeIcon icon={faSignOutAlt} />,
+  <FontAwesomeIcon icon={faChartPie} />,
+  <FontAwesomeIcon icon={faFileInvoiceDollar} />,
+  <FontAwesomeIcon icon={faCalendarAlt} />,
+  <FontAwesomeIcon icon={faWarehouse} />,
 ];
 const text = [
   "Dashboard",
@@ -57,6 +71,10 @@ const text = [
   "Echeance",
   "Historique",
   "Deconnexion",
+  "Tableau de Bord",
+  "Factures",
+  "Années Fiscales",
+  "Stock Comptable",
 ];
 const links = [
   "/appfront/app/pannel",
@@ -66,6 +84,10 @@ const links = [
   "/appfront/app/echeance",
   "/appfront/app/historyv",
   "",
+  "/appfront/app/accounting",
+  "/appfront/app/accounting/invoices",
+  "/appfront/app/accounting/fiscal-years",
+  "/appfront/app/accounting/stock",
 ];
 
 export const MenuItem = ({ i }) => {

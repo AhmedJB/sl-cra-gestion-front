@@ -165,3 +165,28 @@ nav#sidebar.closed{
   }
   
 }
+
+.sidebar-section-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30px 20px 20px 20px;
+  position: relative;
+}
+
+.sidebar-section-divider hr {
+  flex-grow: 1;
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  margin: 0;
+}
+
+.sidebar-section-divider span {
+  position: absolute;
+  background: var(--black);
+  padding: 0 10px;
+  color: var(--grey);
+  font-size: 0.75em;
+  font-weight: 600;
+  letter-spacing: 2px;
+}

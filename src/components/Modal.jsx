@@ -29,15 +29,21 @@ export default function Modal(props) {
           <motion.div
             initial={{
               scale: 0,
+              x: "-50%",
+              y: "-50%",
             }}
             animate={{
               scale: 1,
+              x: "-50%",
+              y: "-50%",
               transition: {
                 duration: 0.3,
               },
             }}
             exit={{
               scale: 0,
+              x: "-50%",
+              y: "-50%",
               transition: {
                 delay: 0.3,
               },

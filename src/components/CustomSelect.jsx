@@ -42,31 +42,23 @@ function CustomSelect(props) {
   }
 
   function test({ props, state, methods }) {
-    console.log(props)
-    /* //console.log(props)
-        //console.log(state)
-        //console.log(methods)
-        //console.log(props.options) */
-    //console.log(props);
-    let opts = props.options;
+    let opts = props.options || [];
+    
+    if (!state.search) {
+      return opts;
+    }
+
     let res = [];
     for (let i = 0; i < opts.length; i++) {
-      /* let rate = similarity(state.search , opts[i].name);
-            if (rate > 0.2){
-                //console.log(opts[i].name)
-            } */
       if (
-        state.search &&  
-        opts[i][props.searchTerm]
+        opts[i][props.searchTerm] &&
+        String(opts[i][props.searchTerm])
           .toLowerCase()
-          .startsWith(state.search.toLowerCase())
+          .includes(state.search.toLowerCase())
       ) {
-        ////console.log(res);
-        ////console.log(opts[i])
         res.push(opts[i]);
       }
     }
-    //methods.setSearch(props.options[0])
 
     return res;
   }
@@ -89,6 +81,7 @@ function CustomSelect(props) {
       searchFn={test}
       noDataLabel={"Aucun resultat"}
       multi={props.multi ? true : false}
+      style={props.disableMargin ? { margin: 0 } : {}}
     />
   );
 }
