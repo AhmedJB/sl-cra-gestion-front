@@ -21,6 +21,7 @@ function Vente(props) {
         obj.logged = true;
         obj.username = resp.username;
         obj.email = resp.email;
+        obj.is_accounting_user = resp.is_accounting_user || false;
         setUser(obj);
         return obj;
       } else {

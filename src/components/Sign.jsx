@@ -18,6 +18,7 @@ function Sign(props) {
         obj.logged = true;
         obj.username = resp.username;
         obj.email = resp.email;
+        obj.is_accounting_user = resp.is_accounting_user || false;
         setUser(obj);
       }
       setLoading(false);
@@ -43,6 +44,7 @@ function Sign(props) {
       obj.logged = true;
       obj.username = resp.username;
       obj.email = resp.email;
+      obj.is_accounting_user = resp.is_accounting_user || false;
       setUser(obj);
     } else {
       addToast("Failed to Login", {
@@ -62,6 +64,7 @@ function Sign(props) {
       obj.logged = true;
       obj.username = resp.username;
       obj.email = resp.email;
+      obj.is_accounting_user = resp.is_accounting_user || false;
       setUser(obj);
     } else {
       addToast("Failed to Register", {

@@ -142,17 +142,7 @@ export async function set_vidiq_account(url, username = null, password = null) {
 }
 
 function formatUrl(url) {
-  if (!url.includes("?")) {
-    return url.endsWith("/") ? url : url + "/";
-  } else {
-    let parts = url.split("?");
-    let path = parts[0];
-    let query = parts.slice(1).join("?");
-    if (!path.endsWith("/")) {
-      path += "/";
-    }
-    return path + "?" + query;
-  }
+  return url;
 }
 
 export async function postReq(url, body) {

@@ -34,7 +34,7 @@ function AccountingFiscalYears(props) {
   const [newYear, setNewYear] = useState("");
 
   const fetchYears = async () => {
-    let resp = await req("accounting/fiscal-years/");
+    let resp = await req("accounting/fiscal-years");
     if (resp) {
       let obj = { ...Data };
       obj.FiscalYears = resp;
@@ -51,7 +51,7 @@ function AccountingFiscalYears(props) {
   const handleCreateYear = async () => {
     if (!newYear) return;
     setLoading(true);
-    let resp = await postReq("accounting/fiscal-years/", { year: parseInt(newYear) });
+    let resp = await postReq("accounting/fiscal-years", { year: parseInt(newYear) });
     if (resp) {
       addToast("Année fiscale créée", { appearance: "success", autoDismiss: true });
       fetchYears();
@@ -65,7 +65,7 @@ function AccountingFiscalYears(props) {
 
   const handleClose = async (id) => {
     setLoading(true);
-    let resp = await postReq(`accounting/fiscal-years/${id}/close/`, { create_next_year: true });
+    let resp = await postReq(`accounting/fiscal-years/${id}/close`, { create_next_year: true });
     if (resp) {
       addToast("Année clôturée", { appearance: "success", autoDismiss: true });
       fetchYears();

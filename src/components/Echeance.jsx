@@ -189,6 +189,7 @@ function Echeance(props) {
         obj.logged = true;
         obj.username = resp.username;
         obj.email = resp.email;
+        obj.is_accounting_user = resp.is_accounting_user || false;
         setUser(obj);
         let resp2 = await updateEch();
         await updateUsers();

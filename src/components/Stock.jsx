@@ -303,7 +303,7 @@ function Stock(props) {
   //
 
   const updateOptions = async () => {
-    let resp = await req("option/");
+    let resp = await req("option");
     if (resp) {
       setOptions(resp);
     }
@@ -318,6 +318,7 @@ function Stock(props) {
         obj.logged = true;
         obj.username = resp.username;
         obj.email = resp.email;
+        obj.is_accounting_user = resp.is_accounting_user || false;
         setUser(obj);
         await updateData();
         await updateOptions();
@@ -898,7 +899,7 @@ function Stock(props) {
       name,
       value,
     };
-    let resp = await postReq("option/", body);
+    let resp = await postReq("option", body);
     if (resp) {
       await updateOptions();
       addToast("Success", {

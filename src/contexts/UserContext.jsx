@@ -9,7 +9,7 @@ export const UserProvider = props => {
         logged : false,
         username : null,
         email : null,
-        is_accounting_user: true
+        is_accounting_user: false
     }
     
     const [user,setUser] = useState(obj);

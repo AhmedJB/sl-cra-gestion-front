@@ -29,7 +29,7 @@ export const Navigation = (props) => {
     <motion.ul id="content-nav-container" ref={ref} variants={variants}>
       <BrandItem />
       
-      {/* Accounting users: show ONLY accounting items */}
+      {/* Accounting users: ONLY accounting items */}
       {isAccountingUser ? (
         <React.Fragment>
           {accountingIds.map((i) => (
@@ -37,7 +37,7 @@ export const Navigation = (props) => {
           ))}
         </React.Fragment>
       ) : (
-        /* Normal users: show inventory items */
+        /* Non-accounting users: ONLY inventory items */
         <React.Fragment>
           {inventoryIds.map((i) => (
             <MenuItem i={i} key={i} />

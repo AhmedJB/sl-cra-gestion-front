@@ -43,14 +43,14 @@ function AccountingPayments(props) {
   const [notes, setNotes] = useState("");
 
   const fetchPayments = async () => {
-    let resp = await req("accounting/payments/");
+    let resp = await req("accounting/payments");
     if (resp) {
       setPayments(resp);
     }
   };
 
   const fetchInvoices = async () => {
-    let resp = await req("accounting/invoices/");
+    let resp = await req("accounting/invoices");
     if (resp) {
       // Filter out fully paid invoices for the dropdown
       const unpaid = resp.filter((i) => i.status !== "PAID");
@@ -89,7 +89,7 @@ function AccountingPayments(props) {
     };
 
     setLoading(true);
-    let resp = await postReq("accounting/payments/", payload);
+    let resp = await postReq("accounting/payments", payload);
     if (resp) {
       addToast("Paiement enregistré", {
         appearance: "success",

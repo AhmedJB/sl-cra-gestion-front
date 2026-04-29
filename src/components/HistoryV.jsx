@@ -144,7 +144,7 @@ function HistoryV(props) {
 
 
   const updateTransport = async () => {
-    let resp = await req("transport/");
+    let resp = await req("transport");
     if (resp) {
       setTransportOptions(resp);
     }
@@ -241,6 +241,7 @@ function HistoryV(props) {
         obj.logged = true;
         obj.username = resp.username;
         obj.email = resp.email;
+        obj.is_accounting_user = resp.is_accounting_user || false;
         setUser(obj);
         await updateClients();
         await updateOrders();
@@ -726,7 +727,7 @@ function HistoryV(props) {
     let body = {
       name,
     };
-    let resp = await postReq("transport/", body);
+    let resp = await postReq("transport", body);
     if (resp) {
       await updateTransport();
       addToast("Success", {

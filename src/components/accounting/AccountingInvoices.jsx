@@ -670,7 +670,7 @@ function AccountingInvoices(props) {
   const fetchPartners = async () => {
     if (!Data.Suppliers || Data.Suppliers.length === 0) {
       const [supResp, cliResp] = await Promise.all([
-        req("provider/"),
+        req("provider"),
         req("client"),
       ]);
       const updates = {};

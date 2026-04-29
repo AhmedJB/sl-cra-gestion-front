@@ -80,7 +80,7 @@ function AccountingStock(props) {
 
     if (globalProducts.length === 0) {
       setFetchingProducts(true);
-      let resp = await req("silentpd/");
+      let resp = await req("silentpd");
       if (resp && Array.isArray(resp)) {
         const flat = resp.map((p) => {
           if (p.product) {
