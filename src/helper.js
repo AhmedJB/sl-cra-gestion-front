@@ -411,3 +411,7 @@ export function logout(setUser, User) {
 export function sortByRatingDescending(array) {
   return array.sort((a, b) => b.rating - a.rating);
 }
+
+export function round(num) {
+  return Math.round((num + Number.EPSILON) * 100) / 100;
+}

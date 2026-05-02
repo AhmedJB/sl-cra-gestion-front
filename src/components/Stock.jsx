@@ -1532,6 +1532,13 @@ function Stock(props) {
 
   return loading ? (
     loader
+  ) : User.logged && User.is_accounting_user ? (
+    <Redirect
+      to={{
+        pathname: "/appfront/app/accounting",
+        state: { error: true, msg: "Accès refusé" },
+      }}
+    />
   ) : User.logged ? (
     html
   ) : (

@@ -60,7 +60,9 @@ function AccountingDashboard(props) {
       let obj = { ...Data };
       obj.FiscalYears = resp;
       if (!Data.SelectedFiscalYear && resp.length > 0) {
-        let openYear = resp.find((y) => !y.is_locked) || resp[0];
+        const currentYear = new Date().getFullYear();
+        let currentYearObj = resp.find((y) => y.year === currentYear);
+        let openYear = currentYearObj || resp.find((y) => !y.is_locked) || resp[0];
         obj.SelectedFiscalYear = openYear;
         setActiveYearId(openYear.id);
       } else if (Data.SelectedFiscalYear) {

@@ -149,7 +149,7 @@ function Sign(props) {
   ) : User.logged ? (
     <Redirect
       to={{
-        pathname: "/appfront/app/pannel",
+        pathname: User.is_accounting_user ? "/appfront/app/accounting" : "/appfront/app/pannel",
         state: { success: true },
       }}
     />

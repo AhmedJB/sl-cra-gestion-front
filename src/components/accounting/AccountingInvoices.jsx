@@ -25,6 +25,8 @@ import { makePDF } from "multi-page-html2pdf";
 import { Preview } from "react-html2pdf";
 import Logo1 from "../../static/pics/LOGO-1.png";
 import Logo2 from "../../static/pics/LOGOa.png";
+import InvoiceDocument from "../Utils/InvoiceDocument";
+import "../../static/frontend/invoice.css";
 
 // ─── Styled Components ────────────────────────────────────────────────────────
 
@@ -606,6 +608,7 @@ function AccountingInvoices(props) {
 
   // PDF Generation
   const [pdfInvoice, setPdfInvoice] = useState(null);
+  const [previewInvoice, setPreviewInvoice] = useState(null);
 
   const selectedYear = Data.SelectedFiscalYear;
 
@@ -629,15 +632,26 @@ function AccountingInvoices(props) {
     setLoading(false);
   };
 
-  const handleDownload = async (inv) => {
+  const handlePreview = async (inv) => {
     setLoading(true);
     const resp = await req(`accounting/invoices/${inv.id}/`);
     if (resp) {
-      setPdfInvoice(resp);
+      setPreviewInvoice(resp);
     } else {
       addToast("Erreur lors de la récupération des données", { appearance: "error", autoDismiss: true });
-      setLoading(false);
     }
+    setLoading(false);
+  };
+
+  const handleActualDownload = () => {
+    if (previewInvoice) {
+      setPdfInvoice(previewInvoice);
+      setPreviewInvoice(null);
+    }
+  };
+
+  const handleDownload = async (inv) => {
+    await handlePreview(inv);
   };
 
   useEffect(() => {
@@ -1351,91 +1365,93 @@ function AccountingInvoices(props) {
         </div>
       </div>
 
-      {/* ═══ PDF TEMPLATE ═══ */}
-      {pdfInvoice && (
-        <Preview id="accounting-pdf-template">
-          <div id="invoice" className="page" size="A4">
-            <div className="top-padding">
-              <section className="top-content bb d-flex justify-content-between">
-                <div className="logo-facture">
-                  <img src={Logo1} alt="Logo" className="img-fluid" />
-                </div>
-                <img id="watermark" src={Logo2} alt="Watermark" />
-              </section>
-              <section className="store-user mt-5">
-                <div className="col-12 center-elem">
-                  <p>
-                    Facture N<sup>°</sup>: <span>#{pdfInvoice.invoice_number || pdfInvoice.id}</span>
-                  </p>
-                </div>
-                <div className="col-10">
-                  <div className="row-custom pb-3">
-                    <div>
-                      <p>{pdfInvoice.invoice_type === "ACHAT" ? "Fournisseur" : "Client"},</p>
-                      <h2 id="client">
-                        {pdfInvoice.invoice_type === "ACHAT"
-                          ? pdfInvoice.provider_detail?.name
-                          : pdfInvoice.client_detail?.name}
-                      </h2>
-                    </div>
-                    <div>
-                      <p>Le,</p>
-                      <h2>{new Date(pdfInvoice.created_at).toLocaleDateString()}</h2>
-                    </div>
-                  </div>
-                </div>
-              </section>
-              <section className="product-area mt-4">
-                <table id="fact-table" className="table table-hover">
-                  <thead>
-                    <tr>
-                      <td>Quantité</td>
-                      <td>Désignation</td>
-                      <td>P.U</td>
-                      <td>Total</td>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {pdfInvoice.items?.map((e) => (
-                      <tr key={e.id}>
-                        <td>{e.quantity}</td>
-                        <td>
-                          <div className="media">
-                            <div className="media-body">
-                              <p className="mt-0 title">{e.product_name}</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td>{(e.unit_price || 0).toFixed(2)} DH</td>
-                        <td>{(e.total || 0).toFixed(2)} DH</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                  <tfoot>
-                    <tr>
-                      <td />
-                      <td />
-                      <td>Total:</td>
-                      <td>{(pdfInvoice.total || 0).toFixed(2)} DH</td>
-                    </tr>
-                    <tr>
-                      <td />
-                      <td />
-                      <td>Reste à payer:</td>
-                      <td style={{ color: "var(--red)" }}>
-                        {(pdfInvoice.balance_due || 0).toFixed(2)} DH
-                      </td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </section>
-              <footer>
-                <hr />
-                <p className="m-0 text-center">Merci pour votre confiance.</p>
-              </footer>
-            </div>
+      {/* ═══ INVOICE PREVIEW MODAL ═══ */}
+      <Modal open={!!previewInvoice} closeFunction={() => setPreviewInvoice(null)}>
+        <div style={{ width: "800px", maxWidth: "90vw", maxHeight: "85vh", overflow: "auto", background: "#fff", color: "#000", borderRadius: "8px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "15px 20px", borderBottom: "1px solid #eee" }}>
+            <h3 style={{ margin: 0, color: "#333" }}>Aperçu de la Facture</h3>
+            <button
+              onClick={() => setPreviewInvoice(null)}
+              style={{ background: "none", border: "none", fontSize: "1.5rem", cursor: "pointer", color: "#666" }}
+            >
+              &times;
+            </button>
           </div>
-        </Preview>
+          <div style={{ padding: "20px" }}>
+            {previewInvoice && (
+              <InvoiceDocument
+                type={previewInvoice.invoice_type === "ACHAT" ? "facture" : "facture"}
+                templateId="invoice-preview"
+                order={{
+                  o_id: previewInvoice.invoice_number || previewInvoice.id,
+                  invoice_id: previewInvoice.invoice_number || previewInvoice.id,
+                  date: previewInvoice.created_at,
+                  total: previewInvoice.total || 0,
+                  client: previewInvoice.client_detail || null,
+                }}
+                details={
+                  previewInvoice.items?.map((item) => ({
+                    product_name: item.product_name,
+                    quantity: item.quantity,
+                    prix: item.unit_price,
+                  })) || []
+                }
+                client={
+                  previewInvoice.invoice_type === "ACHAT"
+                    ? previewInvoice.provider_detail
+                    : previewInvoice.client_detail
+                }
+              />
+            )}
+          </div>
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", padding: "15px 20px", borderTop: "1px solid #eee" }}>
+            <button
+              className="btn-main"
+              style={{ borderColor: "#666", color: "#666" }}
+              onClick={() => setPreviewInvoice(null)}
+            >
+              Annuler
+            </button>
+            <button
+              className="btn-main"
+              onClick={handleActualDownload}
+              disabled={loading}
+            >
+              {loading ? "Génération..." : "Télécharger PDF"}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* ═══ PDF TEMPLATE (Hidden, used for actual generation) ═══ */}
+      {pdfInvoice && (
+        <div style={{ position: "absolute", left: "-9999px", top: "-9999px" }}>
+          <Preview id="accounting-pdf-template">
+            <InvoiceDocument
+              type={pdfInvoice.invoice_type === "ACHAT" ? "facture" : "facture"}
+              templateId="accounting-pdf-template"
+              order={{
+                o_id: pdfInvoice.invoice_number || pdfInvoice.id,
+                invoice_id: pdfInvoice.invoice_number || pdfInvoice.id,
+                date: pdfInvoice.created_at,
+                total: pdfInvoice.total || 0,
+                client: pdfInvoice.client_detail || null,
+              }}
+              details={
+                pdfInvoice.items?.map((item) => ({
+                  product_name: item.product_name,
+                  quantity: item.quantity,
+                  prix: item.unit_price,
+                })) || []
+              }
+              client={
+                pdfInvoice.invoice_type === "ACHAT"
+                  ? pdfInvoice.provider_detail
+                  : pdfInvoice.client_detail
+              }
+            />
+          </Preview>
+        </div>
       )}
     </Fragment>
   );

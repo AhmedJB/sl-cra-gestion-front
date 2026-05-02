@@ -323,3 +323,206 @@
     font-weight: 600;
 }
 
+/* ═══ NEW INVOICE TEMPLATE STYLES ═══ */
+.invoice-container-root {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #111;
+}
+
+.invoice-sheet {
+    padding: 0.8cm;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* 1. Header */
+.inv-header-centered {
+    display: flex;
+    align-items: center;
+    gap: 1.2cm;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #303030;
+}
+
+.inv-logo {
+    height: 70px;
+    object-fit: contain;
+}
+
+.inv-company-details p {
+    margin: 2px 0;
+    font-size: 9pt;
+    color: #333;
+}
+
+.inv-company-name-top {
+    font-weight: 700;
+    font-size: 11pt !important;
+    color: #111 !important;
+}
+
+/* 2. Title Bar */
+.inv-title-bar {
+    background: #303030;
+    color: #fff;
+    text-align: center;
+    padding: 10px 0;
+    margin: 15px 0;
+}
+
+.inv-title-bar h1 {
+    margin: 0;
+    font-size: 16pt;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+/* 3. Info Grid */
+.inv-info-grid {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    padding: 10px 0;
+}
+
+.inv-info-left p {
+    margin: 3px 0;
+    font-size: 9pt;
+    color: #333;
+}
+
+.inv-label-bold {
+    font-weight: 700;
+    font-size: 8pt !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.inv-client-name {
+    font-size: 12pt !important;
+    font-weight: 600;
+    color: #111 !important;
+}
+
+.inv-info-text {
+    font-size: 8.5pt !important;
+}
+
+.inv-info-right {
+    text-align: right;
+}
+
+.inv-meta-row {
+    display: flex;
+    justify-content: flex-end;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.inv-meta-label {
+    font-size: 8pt;
+    font-weight: 600;
+    color: #555;
+}
+
+.inv-meta-value {
+    font-size: 10pt;
+    font-weight: 700;
+    color: #111;
+}
+
+/* 4. Main Table */
+.inv-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+    font-size: 9pt;
+}
+
+.inv-table thead th {
+    background: #303030;
+    color: #fff;
+    padding: 8px 10px;
+    font-weight: 600;
+    text-align: center;
+    font-size: 8pt;
+    letter-spacing: 0.5px;
+}
+
+.inv-th-desc {
+    text-align: left !important;
+}
+
+.inv-table tbody td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #e0e0e0;
+    text-align: center;
+}
+
+.inv-td-desc {
+    text-align: left !important;
+    font-weight: 500;
+}
+
+.inv-table tbody tr:hover {
+    background: #f9f9f9;
+}
+
+/* 5. Totals Block */
+.inv-totals-block {
+    width: 280px;
+    margin-left: auto;
+    margin-bottom: 20px;
+}
+
+.inv-total-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 12px;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 9pt;
+}
+
+.inv-total-label {
+    font-weight: 600;
+    color: #555;
+}
+
+.inv-total-value {
+    font-weight: 600;
+    color: #111;
+}
+
+.inv-total-final-bar {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: #303030;
+    color: #fff;
+    font-weight: 700;
+    font-size: 11pt;
+    margin-top: 4px;
+}
+
+/* 6. Footer */
+.inv-footer {
+    margin-top: auto;
+    text-align: center;
+    padding-top: 10px;
+    border-top: 2px solid #e0e0e0;
+}
+
+.inv-footer p {
+    margin: 3px 0;
+    font-size: 7.5pt;
+    color: #555;
+}
+
+.inv-footer-company {
+    font-weight: 600;
+    font-size: 8pt !important;
+    color: #333 !important;
+}
+
