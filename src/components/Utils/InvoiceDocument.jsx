@@ -73,11 +73,11 @@ const InvoiceDocument = ({ type, order, details, client, templateId }) => {
 
                         <div className="invoice-sheet">
                             <div className="inv-header-centered">
-                                <img src={Logo1} alt="P3S Logo" className="inv-logo" />
+                                <img src={Logo1} alt="Najate Radiateur" className="inv-logo" />
                                 <div className="inv-company-details">
-                                    <p className="inv-company-name-top">Protections Safety Security Services</p>
-                                    <p>S.A.R.L. au capital de 1 000 000,00 Dh</p>
-                                    <p>Rue Sidi Abderrahmen, Quartier Al-Mazhar, N31 Tanger CP 90070</p>
+                                    <p className="inv-company-name-top">Najate Radiateur</p>
+                                    <p>S.A.R.L. au capital de 50 000,00 Dh</p>
+                                    <p>10 Lot Baraka Wiam Bensouda Mag 3 - Fès</p>
                                 </div>
                             </div>
 
@@ -152,9 +152,9 @@ const InvoiceDocument = ({ type, order, details, client, templateId }) => {
                             )}
 
                             <footer className="inv-footer">
-                                <p className="inv-footer-company">Protections Safety Security Services - S.A.R.L. au capital de 1 000 000,00 Dh</p>
-                                <p>RC : 127647 | ICE : 003081404000059 | I.F : 52483472 | NA CNSS : 4024469</p>
-                                <p>Tél : (+212) 05 31 60 60 64 | Email : Protection035@gmail.com</p>
+                                <p className="inv-footer-company">Najate Radiateur - S.A.R.L. au capital de 50 000,00 Dh</p>
+                                <p>RC : 43697 | ICE : 000010730000029 | IF : 15163065 | TP : 13439808 | CNSS : 9961659</p>
+                                <p>Tél : 06 61 08 56 62 | Email : najate.radiateur@yahoo.fr</p>
                             </footer>
                         </div>
                     </div>

@@ -329,7 +329,7 @@ function HistoryV(props) {
       enddate,
       client: clientFilt && clientFilt.length > 0 ? clientFilt[0].id : "all"
     };
-    let resp = await postReq(`filterorder?page=${page}&page_size=${pageSize}`, body);
+    let resp = await postReq(`filterorder/?page=${page}&page_size=${pageSize}`, body);
     if (resp) {
       let data = resp.results ? resp.results : resp;
       let temp = data;

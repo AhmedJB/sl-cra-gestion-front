@@ -21,10 +21,8 @@ import {
   faShoppingCart,
   faHandHoldingUsd,
 } from "@fortawesome/free-solid-svg-icons";
-import { makePDF } from "multi-page-html2pdf";
 import { Preview } from "react-html2pdf";
-import Logo1 from "../../static/pics/LOGO-1.png";
-import Logo2 from "../../static/pics/LOGOa.png";
+import { downloadInvoicePDF } from "../../utils/pdfGenerator";
 import InvoiceDocument from "../Utils/InvoiceDocument";
 import "../../static/frontend/invoice.css";
 
@@ -657,10 +655,7 @@ function AccountingInvoices(props) {
   useEffect(() => {
     if (pdfInvoice) {
       const timer = setTimeout(() => {
-        makePDF("accounting-pdf-template", {
-          margin: 1,
-          fileName: pdfInvoice.invoice_number || `Facture-${pdfInvoice.id}`,
-        });
+        downloadInvoicePDF("accounting-pdf-template", pdfInvoice.invoice_number || `Facture-${pdfInvoice.id}`);
         setPdfInvoice(null);
         setLoading(false);
       }, 500);
@@ -1367,17 +1362,24 @@ function AccountingInvoices(props) {
 
       {/* ═══ INVOICE PREVIEW MODAL ═══ */}
       <Modal open={!!previewInvoice} closeFunction={() => setPreviewInvoice(null)}>
-        <div style={{ width: "800px", maxWidth: "90vw", maxHeight: "85vh", overflow: "auto", background: "#fff", color: "#000", borderRadius: "8px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "15px 20px", borderBottom: "1px solid #eee" }}>
-            <h3 style={{ margin: 0, color: "#333" }}>Aperçu de la Facture</h3>
-            <button
-              onClick={() => setPreviewInvoice(null)}
-              style={{ background: "none", border: "none", fontSize: "1.5rem", cursor: "pointer", color: "#666" }}
-            >
-              &times;
-            </button>
+        <div className="preview-modal-container">
+          <div className="preview-header">
+            <h3>Aperçu de la Facture</h3>
+            <div className="preview-actions">
+              <button className="btn-preview-cancel" onClick={() => setPreviewInvoice(null)}>
+                Annuler
+              </button>
+              <button
+                className="btn-preview-download"
+                onClick={handleActualDownload}
+                disabled={loading}
+              >
+                <FontAwesomeIcon icon={faDownload} />
+                {loading ? "Génération..." : "Télécharger PDF"}
+              </button>
+            </div>
           </div>
-          <div style={{ padding: "20px" }}>
+          <div className="preview-body">
             {previewInvoice && (
               <InvoiceDocument
                 type={previewInvoice.invoice_type === "ACHAT" ? "facture" : "facture"}
@@ -1403,22 +1405,6 @@ function AccountingInvoices(props) {
                 }
               />
             )}
-          </div>
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", padding: "15px 20px", borderTop: "1px solid #eee" }}>
-            <button
-              className="btn-main"
-              style={{ borderColor: "#666", color: "#666" }}
-              onClick={() => setPreviewInvoice(null)}
-            >
-              Annuler
-            </button>
-            <button
-              className="btn-main"
-              onClick={handleActualDownload}
-              disabled={loading}
-            >
-              {loading ? "Génération..." : "Télécharger PDF"}
-            </button>
           </div>
         </div>
       </Modal>
