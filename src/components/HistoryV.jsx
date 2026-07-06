@@ -144,7 +144,7 @@ function HistoryV(props) {
 
 
   const updateTransport = async () => {
-    let resp = await req("transport");
+    let resp = await req("transport/");
     if (resp) {
       setTransportOptions(resp);
     }
@@ -228,7 +228,7 @@ function HistoryV(props) {
   });
 
   const getProducts = async () => {
-    let Prods = await req("silentpd");
+    let Prods = await req("silentpd/");
     setProducts(Prods);
   };
 
@@ -268,7 +268,7 @@ function HistoryV(props) {
   }, []);
 
   async function updateClients() {
-    let supResp = await req("client");
+    let supResp = await req("client/");
     let obj2 = { ...Data };
     obj2.Clients = supResp;
     setData(obj2);
@@ -615,7 +615,7 @@ function HistoryV(props) {
     };
 
 
-    let resp = await postReq("modorder", body);
+    let resp = await postReq("modorder/", body);
     if (resp) {
       if (DeletedOrder.details.length > 0) {
         let options = {
@@ -727,7 +727,7 @@ function HistoryV(props) {
     let body = {
       name,
     };
-    let resp = await postReq("transport", body);
+    let resp = await postReq("transport/", body);
     if (resp) {
       await updateTransport();
       addToast("Success", {

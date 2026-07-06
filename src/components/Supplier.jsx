@@ -131,7 +131,7 @@ function Supplier(props) {
   };
 
   const fetchChangeData = async (supp) => {
-    const resp = await req(`provider-products?fid=${supp.id}`);
+    const resp = await req(`provider-products/?fid=${supp.id}`);
     if (resp) {
       setChangeData(resp);
     } else {
@@ -164,7 +164,7 @@ function Supplier(props) {
 
   async function updateSuppliers() {
     setLoadingSubmit(true);
-    let supResp = await req("provider");
+    let supResp = await req("provider/");
     let obj2 = { ...Data };
     obj2.Suppliers = supResp;
     setData(obj2);
@@ -186,7 +186,7 @@ function Supplier(props) {
       phone,
       address,
     };
-    let resp = await postReq("provider", body);
+    let resp = await postReq("provider/", body);
     if (resp) {
       updateSuppliers();
       addToast("Succès", {
@@ -223,7 +223,7 @@ function Supplier(props) {
   }
 
   async function del(id) {
-    let resp = await req("modprovider/" + String(id));
+    let resp = await req("modprovider/" + String(id) + "/");
     let fourn = Data.Suppliers.filter((e) => e.id == id)[0];
     if (resp) {
       addToast("Fournisseur " + fourn.name + " a ete supprime", {
@@ -267,7 +267,7 @@ function Supplier(props) {
       credit,
       creditp,
     };
-    let resp = await postReq("modprovider/" + String(id), body);
+    let resp = await postReq("modprovider/" + String(id) + "/", body);
     if (resp) {
       addToast("Succès", {
         appearance: "success",

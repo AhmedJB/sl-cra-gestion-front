@@ -55,7 +55,7 @@ function AccountingDashboard(props) {
   const [activeYearId, setActiveYearId] = useState(null);
 
   const fetchYears = async () => {
-    let resp = await req("accounting/fiscal-years");
+    let resp = await req("accounting/fiscal-years/");
     if (resp) {
       let obj = { ...Data };
       obj.FiscalYears = resp;
@@ -81,7 +81,7 @@ function AccountingDashboard(props) {
   useEffect(() => {
     const fetchStats = async () => {
       if (!activeYearId || !Data.SelectedFiscalYear) return;
-      let resp = await req(`accounting/stats?year=${Data.SelectedFiscalYear.year}`);
+      let resp = await req(`accounting/stats/?year=${Data.SelectedFiscalYear.year}`);
       if (resp) {
         setStats(resp);
       }

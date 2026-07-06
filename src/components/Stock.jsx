@@ -182,7 +182,7 @@ function Stock(props) {
   }
 
   async function fetchProduct(id) {
-    let resp = await req('getproduct/' + String(id))
+    let resp = await req('getproduct/' + String(id) + '/')
     let temp = [...cart]
     let index = getProd(resp.id)
     console.log(index)
@@ -303,7 +303,7 @@ function Stock(props) {
   //
 
   const updateOptions = async () => {
-    let resp = await req("option");
+    let resp = await req("option/");
     if (resp) {
       setOptions(resp);
     }
@@ -435,7 +435,7 @@ function Stock(props) {
 
   async function updateProducts(page = currentPage) {
     setLoadingSubmit(true);
-    let pResp = await req(`product?page=${page}&page_size=${pageSize}`);
+    let pResp = await req(`product/?page=${page}&page_size=${pageSize}`);
     if (pResp && pResp.results) {
       let obj = { ...Data };
       obj.Products = pResp.results;
@@ -448,8 +448,8 @@ function Stock(props) {
   }
 
   async function updateData() {
-    let supResp = await req("provider");
-    let pResp = await req(`product?page=${currentPage}&page_size=${pageSize}`);
+    let supResp = await req("provider/");
+    let pResp = await req(`product/?page=${currentPage}&page_size=${pageSize}`);
     let obj2 = { ...Data };
     obj2.Suppliers = supResp;
     if (pResp && pResp.results) {
@@ -461,7 +461,7 @@ function Stock(props) {
 
     // Background fetch for search data if not already present
     if (!allProducts || allProducts.length === 0) {
-      req("silentpd").then((silentResp) => {
+      req("silentpd/").then((silentResp) => {
         if (silentResp) {
           setAllProducts(silentResp);
           setData((prev) => ({ ...prev, AllProducts: silentResp }));
@@ -622,7 +622,7 @@ function Stock(props) {
 
     setBody(body);
 
-    let resp = await postReq("product", body);
+    let resp = await postReq("product/", body);
     if (resp) {
       addToast("Succès", {
         appearance: "success",
@@ -790,7 +790,7 @@ function Stock(props) {
   }
 
   async function del(id) {
-    let resp = await req("modproduct/" + String(id));
+    let resp = await req("modproduct/" + String(id) + "/");
     let p = Products.filter((e) => e.product.p_id == id)[0];
     if (resp) {
       addToast("Produit " + p.product.name + " a ete supprime", {
@@ -822,7 +822,7 @@ function Stock(props) {
 
     setModifyData(body);
 
-    let resp = await postReq("modproduct/" + body.product.p_id, body);
+    let resp = await postReq("modproduct/" + body.product.p_id + "/", body);
     if (resp) {
       addToast("Succès", {
         appearance: "success",
@@ -899,7 +899,7 @@ function Stock(props) {
       name,
       value,
     };
-    let resp = await postReq("option", body);
+    let resp = await postReq("option/", body);
     if (resp) {
       await updateOptions();
       addToast("Success", {

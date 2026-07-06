@@ -19,7 +19,7 @@ const PriceEvolution = ({ productId }) => {
 
   useEffect(() => {
     async function fetchClients() {
-      let resp = await req("client");
+      let resp = await req("client/");
       if (resp) {
         setClients(resp);
       }

@@ -82,7 +82,7 @@ function AdditionRow({ products, details, deleteFromList, orderID, updateOrders 
           autoDismiss: true
         })
       } else {
-        let resp = await postReq("detailsadd", body);
+        let resp = await postReq("detailsadd/", body);
         if (resp) {
           await updateOrders();
           deleteFromList();

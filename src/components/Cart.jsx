@@ -55,7 +55,7 @@ function Cart({products,setProducts,submitOptions,setSubmitOptions,calculateTota
   }, [])
 
   async function updateClients() {
-    let supResp = await req('getclients')
+    let supResp = await req('getclients/')
     for(let i =0; i < supResp.length; i++){
       if (supResp[i].name.toLowerCase().trim() == "comptoir"){
         setSelected(supResp[i]);
@@ -104,7 +104,7 @@ function Cart({products,setProducts,submitOptions,setSubmitOptions,calculateTota
       val = t.value
     }
     let p_id  = t.attributes.datapid.value
-    let pr = await req('getproduct/' + String(p_id));
+    let pr = await req('getproduct/' + String(p_id) + '/');
     if (Number(val) > pr.quantity) {
       addToast(`Stock limité : Quantité ajustée au maximum disponible (${pr.quantity})`, {
         appearance: 'warning',
@@ -128,7 +128,7 @@ function Cart({products,setProducts,submitOptions,setSubmitOptions,calculateTota
     let temp = copy[index]
     if (key == 'quantity'){
       //console.log(pr);
-      let pr = await req('getproduct/' + String(p_id));
+      let pr = await req('getproduct/' + String(p_id) + '/');
       let requestedQt = Number(t.value);
       if (requestedQt > pr.quantity) {
         if (temp[key] !== pr.quantity) {
@@ -222,7 +222,7 @@ function Cart({products,setProducts,submitOptions,setSubmitOptions,calculateTota
       client : selected
     }
 
-    let resp = await postReq('order',body);
+    let resp = await postReq('order/',body);
     if (resp){
       addToast("Commande Confirmé", {
         appearance: "success",

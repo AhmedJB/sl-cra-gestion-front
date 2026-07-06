@@ -219,8 +219,8 @@ function Echeance(props) {
   }, []);
 
   async function updateUsers() {
-    let supResp = await req("client");
-    let supResp2 = await req("provider");
+    let supResp = await req("client/");
+    let supResp2 = await req("provider/");
     let obj2 = { ...Data };
     obj2.Clients = supResp;
     obj2.Suppliers = supResp2;

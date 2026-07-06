@@ -97,7 +97,7 @@ function Client(props) {
   }
 
   async function updateClients() {
-    let supResp = await req("client");
+    let supResp = await req("client/");
     let obj2 = { ...Data };
     obj2.Clients = supResp;
     setData(obj2);
@@ -117,7 +117,7 @@ function Client(props) {
       phone,
       address,
     };
-    let resp = await postReq("client", body);
+    let resp = await postReq("client/", body);
     if (resp) {
       updateClients();
       addToast("Succès", {
@@ -146,7 +146,7 @@ function Client(props) {
   }
 
   async function del(id) {
-    let resp = await req("modclient/" + String(id));
+    let resp = await req("modclient/" + String(id) + "/");
     let fourn = Data.Clients.filter((e) => e.id == id)[0];
     if (resp) {
       addToast("Fournisseur " + fourn.name + " a ete supprime", {
@@ -188,7 +188,7 @@ function Client(props) {
       credit,
       creditp,
     };
-    let resp = await postReq("modclient/" + String(id), body);
+    let resp = await postReq("modclient/" + String(id) + "/", body);
     if (resp) {
       addToast("Succès", {
         appearance: "success",

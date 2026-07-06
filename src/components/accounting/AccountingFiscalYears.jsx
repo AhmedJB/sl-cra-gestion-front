@@ -34,7 +34,7 @@ function AccountingFiscalYears(props) {
   const [newYear, setNewYear] = useState("");
 
   const fetchYears = async () => {
-    let resp = await req("accounting/fiscal-years");
+    let resp = await req("accounting/fiscal-years/");
     if (resp) {
       let obj = { ...Data };
       obj.FiscalYears = resp;
