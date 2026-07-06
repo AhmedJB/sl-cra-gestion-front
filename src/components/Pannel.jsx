@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, Fragment, useMemo, useCallback } from "react";
 import { UserContext } from "../contexts/UserContext";
 import { DataContext } from "../contexts/DataContext";
-import { isLogged, req, download_file } from "../helper";
+import { isLogged, req, postReq, download_file } from "../helper";
 import { Redirect } from "react-router-dom";
 import { useToasts } from "react-toast-notifications";
 import Chart from "react-apexcharts";
@@ -12,6 +12,9 @@ import { logout } from "../helper";
 import ReactTooltip from "react-tooltip";
 import CustomSelect from "./CustomSelect";
 import { target_store } from "../config";
+import { DatePicker } from "@material-ui/pickers";
+import { createTheme } from "@material-ui/core";
+import { ThemeProvider } from "@material-ui/styles";
 
 function Pannel(props) {
   const { addToast } = useToasts();
@@ -272,6 +275,61 @@ function Pannel(props) {
   const [chartSellSeries, setChartSellSeries] = useState([]); // ApexCharts series
   const [chartSellLineSeries, setChartSellLineSeries] = useState([]); // ApexCharts series
 
+  // Payment method sales by date
+  const [paymentDate, setPaymentDate] = useState(new Date());
+  const [paymentMethodOptions, setPaymentMethodOptions] = useState({
+    chart: { id: "payment-method-bar" },
+    colors: ["#5900ff", "#4f7e9e", "#654ea3", "#804ea0"],
+    xaxis: {
+      categories: [],
+      labels: { style: { colors: "#fff", fontSize: "12px" } },
+    },
+    yaxis: {
+      labels: {
+        style: { colors: "#fff", fontSize: "12px" },
+        formatter: function (val) { return val + " DH"; },
+      },
+    },
+    plotOptions: {
+      bar: {
+        distributed: true,
+        columnWidth: "50%",
+      },
+    },
+    legend: {
+      show: false,
+    },
+    dataLabels: {
+      enabled: true,
+      style: { colors: ["#fff"], fontSize: "14px" },
+      formatter: function (val) { return val + " DH"; },
+    },
+  });
+  const [paymentMethodSeries, setPaymentMethodSeries] = useState([]);
+
+  const materialTheme = createTheme({
+    overrides: {
+      MuiPickersToolbar: {
+        toolbar: { backgroundColor: "#282828" },
+      },
+      MuiPickersDay: {
+        daySelected: { backgroundColor: "#5900ff" },
+      },
+      MuiInputBase: {
+        root: { color: "#fff" },
+      },
+      MuiInput: {
+        underline: {
+          "&:before": { borderBottom: "1px solid #5900ff" },
+          "&:hover:not(.Mui-disabled):before": { borderBottom: "2px solid #5900ff" },
+        },
+      },
+      MuiFormLabel: {
+        root: { color: "#aaa" },
+      },
+    },
+  });
+
   // Fetch data from the backend
   const fetchSalesData = async () => {
     try {
@@ -290,6 +348,64 @@ function Pannel(props) {
       console.error("Error fetching data:", error);
     }
   };
+
+  // Fetch orders via filterorder/ (same as HistoryV) then aggregate by payment mode
+  const fetchSalesByMode = async (d) => {
+    try {
+      const start = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0);
+      const end = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59);
+      console.log("fetchSalesByMode sending:", { start, end, iso: { start: start.toISOString(), end: end.toISOString() } });
+      const resp = await postReq("filterorder/?page_size=99999", {
+        startdate: start,
+        enddate: end,
+        client: "all",
+      });
+      console.log("resp:", resp);
+      if (!resp || !resp.results) {
+        console.log("No resp or no resp.results");
+        return;
+      }
+      console.log("results count:", resp.results.length);
+
+      const modeMap = {
+        0: "Espèces",
+        1: "Chèque",
+        2: "Effet",
+        3: "Versement",
+      };
+      const totals = { Espèces: 0, Chèque: 0, Effet: 0, Versement: 0 };
+
+      for (const item of resp.results) {
+        console.log("item.order:", item.order);
+        const mode = item.order.mode;
+        const total = item.order.total;
+        console.log(`mode=${mode}, total=${total}`);
+        const label = modeMap[mode] || "Autre";
+        totals[label] = (totals[label] || 0) + total;
+      }
+
+      console.log("computed totals:", totals);
+      const categories = Object.keys(totals);
+      const values = Object.values(totals);
+
+      setPaymentMethodOptions((prev) => ({
+        ...prev,
+        xaxis: { ...prev.xaxis, categories },
+      }));
+      setPaymentMethodSeries([{ name: "Total (DH)", data: values }]);
+    } catch (error) {
+      console.error("Error fetching sales by mode:", error);
+    }
+  };
+
+  const handlePaymentDateChange = (d) => {
+    setPaymentDate(d);
+    fetchSalesByMode(d);
+  };
+
+  useEffect(() => {
+    fetchSalesByMode(paymentDate);
+  }, []);
 
   // Function to update the chart based on the selected product
   const updateChart = (product, allData) => {
@@ -649,6 +765,40 @@ function Pannel(props) {
     </div>
   ), [stable]);
 
+  const paymentMethodChart = useMemo(() => (
+    <div className="row">
+      <Card width="90%" height="auto" minHeight="400px">
+        <div className="title-select-row">
+          <h3 className="card-title text-center inline">Ventes par mode de paiement</h3>
+          <div className="inline">
+            <ThemeProvider theme={materialTheme}>
+              <DatePicker
+                variant="inline"
+                label="Date"
+                value={paymentDate}
+                onChange={handlePaymentDateChange}
+                format="dd/MM/yyyy"
+                animateYearScrolling
+              />
+            </ThemeProvider>
+          </div>
+        </div>
+        {paymentMethodSeries.length > 0 ? (
+          <Chart
+            options={paymentMethodOptions}
+            series={paymentMethodSeries}
+            type="bar"
+            height="350"
+          />
+        ) : (
+          <div style={{ height: 350, display: "flex", alignItems: "center", justifyContent: "center", color: "#aaa" }}>
+            Aucune donnée pour cette date
+          </div>
+        )}
+      </Card>
+    </div>
+  ), [paymentDate, paymentMethodOptions, paymentMethodSeries]);
+
   const top5chart = (
     <div className="row">
       <div className="card" style={{ width: "90%", height: "auto", minHeight: "500px" }}>
@@ -782,6 +932,7 @@ function Pannel(props) {
       <div className="pannel-container">
         {overview}
         {salesChart}
+        {paymentMethodChart}
         {supplierChart}
         {clientChart}
         {articleChart}

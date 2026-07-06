@@ -51,7 +51,7 @@ function AccountingFiscalYears(props) {
   const handleCreateYear = async () => {
     if (!newYear) return;
     setLoading(true);
-    let resp = await postReq("accounting/fiscal-years", { year: parseInt(newYear) });
+    let resp = await postReq("accounting/fiscal-years/", { year: parseInt(newYear) });
     if (resp) {
       addToast("Année fiscale créée", { appearance: "success", autoDismiss: true });
       fetchYears();
@@ -65,10 +65,23 @@ function AccountingFiscalYears(props) {
 
   const handleClose = async (id) => {
     setLoading(true);
-    let resp = await postReq(`accounting/fiscal-years/${id}/close`, { create_next_year: true });
+    let resp = await postReq(`accounting/fiscal-years/${id}/close/`, { create_next_year: true });
     if (resp) {
       addToast("Année clôturée", { appearance: "success", autoDismiss: true });
-      fetchYears();
+      let obj = { ...Data };
+      if (obj.FiscalYears) {
+        obj.FiscalYears = obj.FiscalYears.map(y =>
+          y.id === id ? { ...y, is_locked: true, closed_at: new Date().toISOString() } : y
+        );
+      }
+      if (resp.next_year) {
+        const exists = obj.FiscalYears.some(y => y.id === resp.next_year.id);
+        if (!exists) {
+          obj.FiscalYears = [...obj.FiscalYears, resp.next_year];
+        }
+        obj.SelectedFiscalYear = resp.next_year;
+      }
+      setData(obj);
     } else {
       addToast("Erreur de clôture", { appearance: "error", autoDismiss: true });
     }

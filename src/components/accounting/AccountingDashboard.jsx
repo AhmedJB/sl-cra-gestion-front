@@ -62,7 +62,7 @@ function AccountingDashboard(props) {
       if (!Data.SelectedFiscalYear && resp.length > 0) {
         const currentYear = new Date().getFullYear();
         let currentYearObj = resp.find((y) => y.year === currentYear);
-        let openYear = currentYearObj || resp.find((y) => !y.is_locked) || resp[0];
+        let openYear = resp.find((y) => !y.is_locked) || currentYearObj || resp[0];
         obj.SelectedFiscalYear = openYear;
         setActiveYearId(openYear.id);
       } else if (Data.SelectedFiscalYear) {
@@ -107,7 +107,7 @@ function AccountingDashboard(props) {
   const handleCreateYear = async () => {
     if (!newYear) return;
     setLoading(true);
-    let resp = await postReq("accounting/fiscal-years", { year: parseInt(newYear) });
+    let resp = await postReq("accounting/fiscal-years/", { year: parseInt(newYear) });
     if (resp) {
       addToast("Année fiscale " + newYear + " créée", { appearance: "success", autoDismiss: true });
       setNewYear("");
