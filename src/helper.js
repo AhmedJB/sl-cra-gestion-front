@@ -409,7 +409,7 @@ export async function deleteReq(url) {
 }
 
 export async function isLogged() {
-  let resp = await req("session");
+  let resp = await req("session/");
   return resp;
 }
 
