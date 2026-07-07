@@ -43,6 +43,7 @@ import { makePDF } from "multi-page-html2pdf";
 import useServerPagination from "./hooks/useServerPagination";
 import Pagination from "./Utils/Pagination";
 import AdditionRow from "./Utils/AdditionRow";
+import InvoiceDocument from "./Utils/InvoiceDocument";
 import Logo1 from "../static/pics/LOGO-1.png";
 import Logo2 from "../static/pics/LOGOa.png";
 import { target_store } from "../config";
@@ -77,6 +78,8 @@ function HistoryV(props) {
       },
     ],
   });
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewType, setPreviewType] = useState(null);
 
   const [DeletedOrder, setDeleted] = useState({
     client: {},
@@ -743,153 +746,9 @@ function HistoryV(props) {
     }
   };
 
-  const bon = useMemo(() => SelectedOrder.details.map((order, i) => {
-    return (
-      <div
-        key={SelectedOrder.order.o_id + '-' + i}
-        id="invoice"
-        className="page"
-        size="A4"
-      >
-        <div className="top-padding">
-          {
-            target_store  === 2 && <section className="top-content bb d-flex justify-content-between">
-            <div className="logo-facture">
-              <img src={Logo1} alt className="img-fluid" />
-            </div>
-            <img id="watermark" src={Logo2} />
-            {/* <div className="top-left">
-        <div className="graphic-path">
-          <p id="bon-title">Bon De livraison</p>
-        </div>
-      </div> */}
-          </section>
-          }
-          
-          <section className="store-user mt-5">
-            <div className="col-12 center-elem">
-              <p>
-                Bon de livraison N<sup>°</sup>:{" "}
-                <span>#{SelectedOrder.order.o_id}</span>
-              </p>
-            </div>
-            <div className="col-10">
-              <div className="row-custom pb-3">
-                <div>
-                  <p>Client,</p>
-                  <h2 id="client">{order.client.name}</h2>
-                </div>
-                <div>
-                  <p>Le,</p>
-                  <h2>
-                    {new Date(SelectedOrder.order.date).getUTCDate() +
-                      "-" +
-                      (new Date(SelectedOrder.order.date).getUTCMonth() + 1) +
-                      "-" +
-                      new Date(SelectedOrder.order.date).getUTCFullYear()}
-                  </h2>
-                </div>
-              </div>
-            </div>
-          </section>
-          <section className="product-area mt-4">
-            <table id="fact-table" className="table table-hover">
-              <thead>
-                <tr>
-                  <td>N<sup>o</sup>
-                  </td>
-                  
-                  <td>Designation</td>
-                  <td>Quantite</td>
-                  <td>P.U</td>
-                  <td>Total</td>
-                </tr>
-              </thead>
-              <tbody>
-                {order.details.map((e,i) => {
-                  return (
-                    <tr key={e.id || i}>
-                      <td>{i+1}</td>
-                      <td>
-                        <div className="media">
-                          <div className="media-body">
-                            <p className="mt-0 title">{e.product_name}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td>{e.quantity}</td>
-                      <td>{e.prix}</td>
-                      <td>{round(Number(e.quantity) * Number(e.prix))}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-              {(() => {
-                if (i + 1 == SelectedOrder.details.length) {
-                  return (
-                    <tfoot>
-                      <tr>
-                        <td />
-                        <td />
-                        <td className="bord">Total {target_store ===  2 ? "TTC" : "HT"}:</td>
-                        <td className="bord">
-                          {round(SelectedOrder.order.total)}DH
-                        </td>
-                      </tr>
-                    </tfoot>
-                  );
-                }
-              })()}
-            </table>
-          </section>
-          <section className="balance-info">
-            <div className="">
-              <div className="col-8">
-                <p className="m-0 font-weight-bold note">
-                  {" "}
-                  Note:{" "}
-                  <span>
-                    Reconnaît avoir recu conforme à la livraison ci-dessus
-                  </span>{" "}
-                </p>
-                <p />
-              </div>
-            </div>
-          </section>
-          {/* Cart BG */}
-          {/*  <img src="/static/pics/cart.jpg" className="img-fluid cart-bg" alt /> */}
-          {/* <footer id="footer-facture">
-            <hr />
-            <p className="m-0 text-center  colortext">
-              10 Lot Baraka Wiam Bensouda Mag 3 ‐ Fès / GSM: 06 61 08 56 62
-            </p>
-            <br />
-            <span className="email">
-              <span>Email: najate.radiateur@yahoo.fr</span>
-            </span>
-            <br />
-            <div className="social">
-              <span className="pr-2">
-                <span>TP: 13439808</span>
-              </span>
-              <span className="pr-2">
-                <span>IF: 15163065</span>
-              </span>
-              <span className="pr-2">
-                <span>RC: 43697</span>
-              </span>
-              <span className="pr-2">
-                <span>CNSS: 9961659</span>
-              </span>
-              <span className="pr-2">
-                <span>ICE: 000010730000029</span>
-              </span>
-            </div>
-          </footer> */}
-        </div>
-      </div>
-    );
-  }), [SelectedOrder]);
+  const bon = useMemo(() => (
+    <InvoiceDocument type="bon" order={SelectedOrder.order} details={SelectedOrder.details} />
+  ), [SelectedOrder]);
 
   const fac_avoir = (
     <div id="invoice" className="page" size="A4">
@@ -1055,200 +914,14 @@ function HistoryV(props) {
     </div>
   );
 
-  const template = SelectedOrder.details.map((order, i) => {
-    return (
-      <div id="invoice" className="page" size="A4">
-        <div className="top-padding">
-          <section className="top-content bb d-flex justify-content-between">
-            <div className="logo-facture">
-              <img src={Logo1} alt className="img-fluid" />
-            </div>
-            <img id="watermark" src={Logo2} />
-            {/* <div className="top-left">
-        <div className="graphic-path">
-          <p>Facture</p>
-        </div>
-      </div> */}
-          </section>
-          <section className="store-user mt-5">
-            <div className="col-12 center-elem">
-              <p>
-                Facture N<sup>°</sup>: {target_store  === 2  && <span>#{SelectedOrder.order.o_id}</span>}
-              </p>
-            </div>
-            <div className="col-10">
-              <div className="row-custom pb-3">
-                <div>
-                  <p>Client,</p>
-                  <h2 id="client">{order.client.name}</h2>
-                </div>
-                <div>
-                  <p>Le,</p>
-                  {
-                    target_store === 2 &&  <h2>
-                    {new Date(SelectedOrder.order.date).getUTCDate() +
-                      "-" +
-                      (new Date(SelectedOrder.order.date).getUTCMonth() + 1) +
-                      "-" +
-                      new Date(SelectedOrder.order.date).getUTCFullYear()}
-                  </h2>
-                  }
-                  
-                </div>
-              </div>
-            </div>
-          </section>
-          <section className="product-area mt-4">
-            <table id="fact-table" className="table table-hover">
-              <thead>
-                <tr>
-                  <td>Quantite</td>
-                  <td>Designation</td>
-                  <td>P.U</td>
-                  <td>Total</td>
-                </tr>
-              </thead>
-              <tbody>
-                {order.details.map((e) => {
-                  return (
-                    <tr>
-                      <td>{e.quantity}</td>
-                      <td>
-                        <div className="media">
-                          <div className="media-body">
-                            <p className="mt-0 title">{e.product_name}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td>{e.prix}DH</td>
-                      <td>{e.prix * e.quantity}DH</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-              {(() => {
-                if (i + 1 == SelectedOrder.details.length) {
-                  return (
-                    <tfoot>
-                      <tr>
-                        <td />
-                        <td />
-                        <td>Total {target_store ===  2  ? "TTC" : "HT"}:</td>
-                        <td>{round(SelectedOrder.order.total)}DH</td>
-                      </tr>
-                      {
-                        target_store  === 1 && <>
-                          <tr>
-                        <td />
-                        <td />
-                        <td>TVA 20%:</td>
-                        <td>
-                          {round((SelectedOrder.order.total * 20) / 100)}DH
-                        </td>
-                      </tr>
-                      <tr>
-                        <td />
-                        <td />
-                        <td className="bord">Total TTC:</td>
-                        <td className="bord">
-                          {round(
-                            SelectedOrder.order.total +
-                              (SelectedOrder.order.total * 20) / 100
-                          )}
-                          DH
-                        </td>
-                      </tr>
-                        </>
-                      }
-                      
-                    </tfoot>
-                  );
-                }
-              })()}
-            </table>
-          </section>
-          <section className="balance-info">
-            <div className="">
-              <div className="col-8">
-                <p className="m-0 font-weight-bold note">
-                  {" "}
-                  Note:{" "}
-                  <span>
-                    Reconnaît avoir recu conforme à la livraison ci-dessus
-                  </span>{" "}
-                </p>
-                <p />
-              </div>
-              {/* <div className="col-4">
-            <table className="table total border-0 table-hover">
-                <tr>
-                    <td>Total HT:</td>
-                    <td>1000DH</td>
-                </tr>
-                <tr>
-                    <td>TVA 20%:</td>
-                    <td>200DH</td>
-                </tr>
-                <tfoot>
-                    <tr>
-                        <td>Total TTC:</td>
-                        <td>1200DH</td>
-                    </tr>
-                </tfoot>
-            </table>
-
-             Signature 
-        </div> */}
-            </div>
-          </section>
-          {/* Cart BG */}
-          {/*  <img src="/static/pics/cart.jpg" className="img-fluid cart-bg" alt /> */}
-          <footer id="footer-facture">
-            <hr />
-            <p className="m-0 text-center colortext">
-              10 Lot Baraka Wiam Bensouda Mag 3 ‐ Fès / GSM: 06 61 08 56 62
-            </p>
-            <br />
-            <span className="email">
-              <span>Email: najate.radiateur@yahoo.fr</span>
-            </span>
-            <br />
-            <div className="social">
-              <span className="pr-2">
-                <span>TP: 13439808</span>
-              </span>
-              <span className="pr-2">
-                <span>IF: 15163065</span>
-              </span>
-              <span className="pr-2">
-                <span>RC: 43697</span>
-              </span>
-              <span className="pr-2">
-                <span>CNSS: 9961659</span>
-              </span>
-              <span className="pr-2">
-                <span>ICE: 000010730000029</span>
-              </span>
-            </div>
-          </footer>
-        </div>
-      </div>
-    );
-  });
+  const template = (
+    <InvoiceDocument type="facture" order={SelectedOrder.order} details={SelectedOrder.details} />
+  );
 
   const DataTable = useMemo(() => (
     <Fragment>
-      {SelectedOrder.order.o_id ? (
-        <div id="exportPdf">
-          <Preview id={"jsx-template-2"}>{bon}</Preview>
-          <Preview id={"jsx-template"}>{template}</Preview>
-        </div>
-      ) : (
-        ""
-      )}
-
       {DeletedOrder.order.o_id ? (
-        <div id="exportPdf">
+        <div id="exportPdf" style={{ position: 'absolute', left: '-9999px', opacity: 0, pointerEvents: 'none' }}>
           <Preview id={"jsx-template-3"}>{fac_avoir}</Preview>
         </div>
       ) : (
@@ -1291,7 +964,7 @@ function HistoryV(props) {
                     </td>
                     <td className="status">
                       <button
-                        onClick={() => downloadFact()}
+                        onClick={() => { updateData(e.order.id); setPreviewType("facture"); setPreviewOpen(true); }}
                         className="factsubmit"
                         id="submit"
                       >
@@ -1300,7 +973,7 @@ function HistoryV(props) {
                     </td>
                     <td className="status">
                       <button
-                        onClick={() => downloadBon()}
+                        onClick={() => { updateData(e.order.id); setPreviewType("bon"); setPreviewOpen(true); }}
                         className="factsubmit"
                         id="submit"
                       >
@@ -1336,6 +1009,59 @@ function HistoryV(props) {
 
   const html = (
     <Fragment>
+      <style>{`
+        .preview-modal-container {
+          width: 90vw;
+          max-height: 85vh;
+          display: flex;
+          flex-direction: column;
+          background: #fff;
+          border-radius: 8px;
+          overflow: hidden;
+        }
+        .preview-modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 16px 24px;
+          border-bottom: 1px solid #e0e0e0;
+          background: #fafafa;
+        }
+        .preview-modal-header h3 {
+          margin: 0;
+          color: #333;
+        }
+        .preview-modal-actions {
+          display: flex;
+          gap: 8px;
+        }
+        .preview-modal-actions button {
+          padding: 8px 16px;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 14px;
+          border: 1px solid #ccc;
+        }
+        .btn-preview-cancel {
+          background: #fff;
+          color: #333;
+        }
+        .btn-preview-download {
+          background: #5900ff;
+          color: #fff;
+          border-color: #5900ff;
+        }
+        .preview-modal-body {
+          flex: 1;
+          overflow: auto;
+          padding: 24px;
+          background: #f5f5f5;
+        }
+        .preview-modal-body #exportPdf {
+          background: #fff;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+      `}</style>
       {/* modal for adding transport */}
 
       <Modal open={openTransport} closeFunction={closeOptions}>
@@ -1580,6 +1306,31 @@ function HistoryV(props) {
           </>
         )}
       </section>
+
+      <Modal open={previewOpen} closeFunction={() => setPreviewOpen(false)}>
+        <div className="preview-modal-container">
+          <div className="preview-modal-header">
+            <h3>{previewType === "facture" ? "Aperçu Facture" : "Aperçu Bon de Livraison"}</h3>
+            <div className="preview-modal-actions">
+              <button className="btn-preview-cancel" onClick={() => setPreviewOpen(false)}>Annuler</button>
+              <button className="btn-preview-download" onClick={() => {
+                const id = previewType === "facture" ? "jsx-template" : "jsx-template-2";
+                makePDF(id, { margin: 1, fileName: SelectedOrder.order.o_id });
+                setPreviewOpen(false);
+              }}>Télécharger PDF</button>
+            </div>
+          </div>
+          <div className="preview-modal-body">
+            <div id="exportPdf">
+              {previewType === "facture" ? (
+                <Preview id="jsx-template">{template}</Preview>
+              ) : (
+                <Preview id="jsx-template-2">{bon}</Preview>
+              )}
+            </div>
+          </div>
+        </div>
+      </Modal>
     </Fragment>
   );
 
