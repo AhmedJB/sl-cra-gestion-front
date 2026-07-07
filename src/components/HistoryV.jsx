@@ -1291,8 +1291,6 @@ function HistoryV(props) {
                     </td>
                     <td className="status">
                       <button
-                        onMouseOver={() => updateData(e.order.id)}
-                        onMouseLeave={() => clearData()}
                         onClick={() => downloadFact()}
                         className="factsubmit"
                         id="submit"
@@ -1302,9 +1300,7 @@ function HistoryV(props) {
                     </td>
                     <td className="status">
                       <button
-                        onMouseOver={() => updateData(e.order.id)}
                         onClick={() => downloadBon()}
-                        onMouseLeave={() => clearData()}
                         className="factsubmit"
                         id="submit"
                       >
