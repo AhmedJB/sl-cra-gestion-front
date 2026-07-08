@@ -164,11 +164,13 @@ const InvoiceDocument = ({ type, order, details, client, templateId }) => {
                                 </div>
                             )}
 
-                            <footer className="inv-footer">
-                                <p className="inv-footer-company">Najate Radiateur - S.A.R.L. au capital de 50 000,00 Dh</p>
-                                <p>RC : 43697 | ICE : 000010730000029 | IF : 15163065 | TP : 13439808 | CNSS : 9961659</p>
-                                <p>Tél : 06 61 08 56 62 | Email : najate.radiateur@yahoo.fr</p>
-                            </footer>
+                            {!isBon && (
+                                <footer className="inv-footer">
+                                    <p className="inv-footer-company">Najate Radiateur - S.A.R.L. au capital de 50 000,00 Dh</p>
+                                    <p>RC : 43697 | ICE : 000010730000029 | IF : 15163065 | TP : 13439808 | CNSS : 9961659</p>
+                                    <p>Tél : 06 61 08 56 62 | Email : najate.radiateur@yahoo.fr</p>
+                                </footer>
+                            )}
                         </div>
                     </div>
                 );
