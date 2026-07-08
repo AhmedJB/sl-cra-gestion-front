@@ -35,9 +35,11 @@ const InvoiceDocument = ({ type, order, details, client, templateId }) => {
 
     const isBonSansPrix = type === "bon_sans_prix";
     const isPurchaseOrder = type === "bon_commande";
+    const isBon = type === "bon";
     const showPrices = !isBonSansPrix && !isPurchaseOrder;
+    const showTva = !isBonSansPrix && !isPurchaseOrder && !isBon;
 
-    const clientLabel = type === "bon_commande_fournisseur" ? "FOURNISSEUR :" : "FACTURÉ À :";
+    const clientLabel = type === "bon_commande_fournisseur" ? "FOURNISSEUR :" : isBon ? "CLIENT :" : "FACTURÉ À :";
 
     const docNumLabel = (() => {
         switch (type) {
@@ -72,14 +74,16 @@ const InvoiceDocument = ({ type, order, details, client, templateId }) => {
                         <img id="watermark" src={Logo2} alt="" />
 
                         <div className="invoice-sheet">
-                            <div className="inv-header-centered">
-                                <img src={Logo1} alt="Najate Radiateur" className="inv-logo" />
-                                <div className="inv-company-details">
-                                    <p className="inv-company-name-top">Najate Radiateur</p>
-                                    <p>S.A.R.L. au capital de 50 000,00 Dh</p>
-                                    <p>10 Lot Baraka Wiam Bensouda Mag 3 - Fès</p>
+                            {!isBon && (
+                                <div className="inv-header-centered">
+                                    <img src={Logo1} alt="Najate Radiateur" className="inv-logo" />
+                                    <div className="inv-company-details">
+                                        <p className="inv-company-name-top">Najate Radiateur</p>
+                                        <p>S.A.R.L. au capital de 50 000,00 Dh</p>
+                                        <p>10 Lot Baraka Wiam Bensouda Mag 3 - Fès</p>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
                             <div className="inv-title-bar">
                                 <h1>{getTitle()}</h1>
@@ -113,7 +117,7 @@ const InvoiceDocument = ({ type, order, details, client, templateId }) => {
                                         {showPrices && <th>PU HT</th>}
                                         <th>QTE</th>
                                         {showPrices && <th>MT HT</th>}
-                                        {showPrices && <th>TVA</th>}
+                                        {showTva && <th>TVA</th>}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -127,7 +131,7 @@ const InvoiceDocument = ({ type, order, details, client, templateId }) => {
                                                 {showPrices && <td>{fmt(pu).replace(" DH", "")}</td>}
                                                 <td>{qty}</td>
                                                 {showPrices && <td>{fmt(mt)}</td>}
-                                                {showPrices && <td>20%</td>}
+                                                {showTva && <td>20%</td>}
                                             </tr>
                                         );
                                     })}
@@ -136,18 +140,27 @@ const InvoiceDocument = ({ type, order, details, client, templateId }) => {
 
                             {showPrices && (
                                 <div className="inv-totals-block">
-                                    <div className="inv-total-row">
-                                        <span className="inv-total-label">SOUS-TOTAL HT</span>
-                                        <span className="inv-total-value">{fmt(orderTotal)}</span>
-                                    </div>
-                                    <div className="inv-total-row">
-                                        <span className="inv-total-label">TVA TOTAL (20%)</span>
-                                        <span className="inv-total-value">{fmt(taxTotal)}</span>
-                                    </div>
-                                    <div className="inv-total-final-bar">
-                                        <span>TOTAL</span>
-                                        <span>{fmt(grandTotal)}</span>
-                                    </div>
+                                    {isBon ? (
+                                        <div className="inv-total-final-bar">
+                                            <span>TOTAL</span>
+                                            <span>{fmt(orderTotal)}</span>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div className="inv-total-row">
+                                                <span className="inv-total-label">SOUS-TOTAL HT</span>
+                                                <span className="inv-total-value">{fmt(orderTotal)}</span>
+                                            </div>
+                                            <div className="inv-total-row">
+                                                <span className="inv-total-label">TVA TOTAL (20%)</span>
+                                                <span className="inv-total-value">{fmt(taxTotal)}</span>
+                                            </div>
+                                            <div className="inv-total-final-bar">
+                                                <span>TOTAL</span>
+                                                <span>{fmt(grandTotal)}</span>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             )}
 
