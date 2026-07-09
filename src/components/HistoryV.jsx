@@ -103,6 +103,10 @@ function HistoryV(props) {
       name: "versement",
       id: 3,
     },
+    {
+      name: "simple",
+      id: 4,
+    },
   ]);
 
   const [transportOptions, setTransportOptions] = useState([

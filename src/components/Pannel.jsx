@@ -275,11 +275,13 @@ function Pannel(props) {
   const [chartSellSeries, setChartSellSeries] = useState([]); // ApexCharts series
   const [chartSellLineSeries, setChartSellLineSeries] = useState([]); // ApexCharts series
 
-  // Payment method sales by date
-  const [paymentDate, setPaymentDate] = useState(new Date());
+  // Payment method sales by date range
+  const today = new Date();
+  const [paymentStartDate, setPaymentStartDate] = useState(new Date(today));
+  const [paymentEndDate, setPaymentEndDate] = useState(new Date(today));
   const [paymentMethodOptions, setPaymentMethodOptions] = useState({
     chart: { id: "payment-method-bar" },
-    colors: ["#5900ff", "#4f7e9e", "#654ea3", "#804ea0"],
+    colors: ["#5900ff", "#4f7e9e", "#654ea3", "#804ea0", "#2e8b57"],
     xaxis: {
       categories: [],
       labels: { style: { colors: "#fff", fontSize: "12px" } },
@@ -350,10 +352,10 @@ function Pannel(props) {
   };
 
   // Fetch orders via filterorder/ (same as HistoryV) then aggregate by payment mode
-  const fetchSalesByMode = async (d) => {
+  const fetchSalesByMode = async (startDate, endDate) => {
     try {
-      const start = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0);
-      const end = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59);
+      const start = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), 0, 0, 0);
+      const end = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate(), 23, 59, 59);
       console.log("fetchSalesByMode sending:", { start, end, iso: { start: start.toISOString(), end: end.toISOString() } });
       const resp = await postReq("filterorder/?page_size=99999", {
         startdate: start,
@@ -372,8 +374,9 @@ function Pannel(props) {
         1: "Chèque",
         2: "Effet",
         3: "Versement",
+        4: "Simple",
       };
-      const totals = { Espèces: 0, Chèque: 0, Effet: 0, Versement: 0 };
+      const totals = { Espèces: 0, Chèque: 0, Effet: 0, Versement: 0, Simple: 0 };
 
       for (const item of resp.results) {
         console.log("item.order:", item.order);
@@ -398,13 +401,18 @@ function Pannel(props) {
     }
   };
 
-  const handlePaymentDateChange = (d) => {
-    setPaymentDate(d);
-    fetchSalesByMode(d);
+  const handlePaymentStartChange = (d) => {
+    setPaymentStartDate(d);
+    fetchSalesByMode(d, paymentEndDate);
+  };
+
+  const handlePaymentEndChange = (d) => {
+    setPaymentEndDate(d);
+    fetchSalesByMode(paymentStartDate, d);
   };
 
   useEffect(() => {
-    fetchSalesByMode(paymentDate);
+    fetchSalesByMode(paymentStartDate, paymentEndDate);
   }, []);
 
   // Function to update the chart based on the selected product
@@ -770,13 +778,22 @@ function Pannel(props) {
       <Card width="90%" height="auto" minHeight="400px">
         <div className="title-select-row">
           <h3 className="card-title text-center inline">Ventes par mode de paiement</h3>
-          <div className="inline">
+          <div className="inline date-range-picker">
             <ThemeProvider theme={materialTheme}>
               <DatePicker
                 variant="inline"
-                label="Date"
-                value={paymentDate}
-                onChange={handlePaymentDateChange}
+                label="Date début"
+                value={paymentStartDate}
+                onChange={handlePaymentStartChange}
+                format="dd/MM/yyyy"
+                animateYearScrolling
+              />
+              <span className="date-range-separator">—</span>
+              <DatePicker
+                variant="inline"
+                label="Date fin"
+                value={paymentEndDate}
+                onChange={handlePaymentEndChange}
                 format="dd/MM/yyyy"
                 animateYearScrolling
               />
@@ -792,12 +809,12 @@ function Pannel(props) {
           />
         ) : (
           <div style={{ height: 350, display: "flex", alignItems: "center", justifyContent: "center", color: "#aaa" }}>
-            Aucune donnée pour cette date
+            Aucune donnée pour cette période
           </div>
         )}
       </Card>
     </div>
-  ), [paymentDate, paymentMethodOptions, paymentMethodSeries]);
+  ), [paymentStartDate, paymentEndDate, paymentMethodOptions, paymentMethodSeries, handlePaymentStartChange, handlePaymentEndChange]);
 
   const top5chart = (
     <div className="row">

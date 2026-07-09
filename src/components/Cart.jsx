@@ -37,6 +37,10 @@ function Cart({products,setProducts,submitOptions,setSubmitOptions,calculateTota
     {
       name: 'versement',
       id: 3
+    },
+    {
+      name: 'simple',
+      id: 4
     }
   ])
 
