@@ -1,8 +1,8 @@
 import fileDownload from "js-file-download";
 import axios from "axios";
-const base_url = "http://85.31.236.214/gestionapp";
+//const base_url = "http://85.31.236.214/gestionapp";
 //const base_url = target_store === 1 ? "http://85.31.236.214/gestionapp" : "http://85.31.236.214:8080/gestionapp";
-//const base_url = "http://127.0.0.1:8000";
+const base_url = "http://85.31.236.214/gestionapp";
 const api = base_url + "/api/";
 
 //var fileDownload = require('js-file-download');
