@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, Fragment, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useContext, Fragment, useMemo, useCallback, useRef } from "react";
 import { UserContext } from "../contexts/UserContext";
 import { DataContext } from "../contexts/DataContext";
 import { isLogged, req, postReq, download_file } from "../helper";
@@ -12,6 +12,7 @@ import { logout } from "../helper";
 import ReactTooltip from "react-tooltip";
 import CustomSelect from "./CustomSelect";
 import { target_store } from "../config";
+import Modal from "./Modal";
 import { DatePicker } from "@material-ui/pickers";
 import { createTheme } from "@material-ui/core";
 import { ThemeProvider } from "@material-ui/styles";
@@ -280,7 +281,14 @@ function Pannel(props) {
   const [paymentStartDate, setPaymentStartDate] = useState(new Date(today));
   const [paymentEndDate, setPaymentEndDate] = useState(new Date(today));
   const [paymentMethodOptions, setPaymentMethodOptions] = useState({
-    chart: { id: "payment-method-bar" },
+    chart: {
+      id: "payment-method-bar",
+      events: {
+        dataPointSelection: (event, chartContext, config) => {
+          handleBarClick(config.dataPointIndex);
+        },
+      },
+    },
     colors: ["#5900ff", "#4f7e9e", "#654ea3", "#804ea0", "#2e8b57"],
     xaxis: {
       categories: [],
@@ -308,6 +316,9 @@ function Pannel(props) {
     },
   });
   const [paymentMethodSeries, setPaymentMethodSeries] = useState([]);
+  const orderResultsRef = useRef([]);
+  const [breakdownModalOpen, setBreakdownModalOpen] = useState(false);
+  const [breakdownData, setBreakdownData] = useState({ mode: "", clients: [] });
 
   const materialTheme = createTheme({
     overrides: {
@@ -368,6 +379,7 @@ function Pannel(props) {
         return;
       }
       console.log("results count:", resp.results.length);
+      orderResultsRef.current = resp.results;
 
       const modeMap = {
         0: "Espèces",
@@ -399,6 +411,23 @@ function Pannel(props) {
     } catch (error) {
       console.error("Error fetching sales by mode:", error);
     }
+  };
+
+  const handleBarClick = (dataPointIndex) => {
+    const modeMap = { 0: "Espèces", 1: "Chèque", 2: "Effet", 3: "Versement", 4: "Simple" };
+    const modeKey = Object.keys(modeMap)[dataPointIndex];
+    const modeLabel = modeMap[modeKey];
+    const clientTotals = {};
+    for (const item of orderResultsRef.current) {
+      if (String(item.order.mode) === modeKey) {
+        const name = item.client.name;
+        clientTotals[name] = (clientTotals[name] || 0) + Number(item.order.total);
+      }
+    }
+    const clients = Object.entries(clientTotals).map(([name, total]) => ({ name, total }));
+    clients.sort((a, b) => b.total - a.total);
+    setBreakdownData({ mode: modeLabel, clients });
+    setBreakdownModalOpen(true);
   };
 
   const handlePaymentStartChange = (d) => {
@@ -956,6 +985,39 @@ function Pannel(props) {
         {profitChart}
 
       </div>
+
+      <Modal open={breakdownModalOpen} closeFunction={() => setBreakdownModalOpen(false)}>
+        <div className="breakdown-modal">
+          <h2 className="breakdown-title">Clients — {breakdownData.mode}</h2>
+          <table className="breakdown-table">
+            <thead>
+              <tr>
+                <th>Client</th>
+                <th>Total (DH)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {breakdownData.clients.length > 0 ? (
+                breakdownData.clients.map((c, i) => (
+                  <tr key={i}>
+                    <td>{c.name}</td>
+                    <td>{c.total.toLocaleString("fr-FR", { minimumFractionDigits: 2 })}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr><td colSpan="2">Aucun client</td></tr>
+              )}
+            </tbody>
+          </table>
+          <style>{`
+            .breakdown-modal { padding: 24px; min-width: 400px; background: #fff; border-radius: 8px; }
+            .breakdown-title { margin: 0 0 16px; color: #333; font-size: 18px; }
+            .breakdown-table { width: 100%; border-collapse: collapse; }
+            .breakdown-table th, .breakdown-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e0e0e0; color: #333; }
+            .breakdown-table th { background: #f5f5f5; font-weight: 600; }
+          `}</style>
+        </div>
+      </Modal>
     </Fragment>
   );
 
