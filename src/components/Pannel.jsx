@@ -1010,11 +1010,11 @@ function Pannel(props) {
             </tbody>
           </table>
           <style>{`
-            .breakdown-modal { padding: 24px; min-width: 400px; background: #fff; border-radius: 8px; }
-            .breakdown-title { margin: 0 0 16px; color: #333; font-size: 18px; }
+            .breakdown-modal { padding: 24px; min-width: 400px; background: #1e1e1e; border-radius: 8px; }
+            .breakdown-title { margin: 0 0 16px; color: #fff; font-size: 18px; }
             .breakdown-table { width: 100%; border-collapse: collapse; }
-            .breakdown-table th, .breakdown-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e0e0e0; color: #333; }
-            .breakdown-table th { background: #f5f5f5; font-weight: 600; }
+            .breakdown-table th, .breakdown-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #333; color: #ddd; }
+            .breakdown-table th { background: #2a2a2a; font-weight: 600; color: #fff; }
           `}</style>
         </div>
       </Modal>
