@@ -60,8 +60,7 @@ const InvoiceDocument = ({ type, order, details, client, templateId }) => {
         <div id={templateId} className="invoice-container-root">
             {normalizedData.map((group, pageIdx) => {
                 const lines = Array.isArray(group.details) ? group.details : [];
-                const subTotal = lines.reduce((s, item) => s + Number(item.prix || 0) * Number(item.quantity || 0), 0);
-                const orderTotal = Number(order?.total ?? subTotal);
+                const orderTotal = lines.reduce((s, item) => s + Number(item.prix || 0) * Number(item.quantity || 0), 0);
                 const taxTotal = round(orderTotal * 0.2);
                 const grandTotal = round(orderTotal + taxTotal);
 
