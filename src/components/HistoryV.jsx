@@ -438,8 +438,9 @@ function HistoryV(props) {
       details: [],
     };
     console.log(order);
+    const ROWS_PER_PAGE = 15;
     for (let i = 0; i < order.details.length; i++) {
-      if (i % 10 == 0 && i != 0) {
+      if (i % ROWS_PER_PAGE == 0 && i != 0) {
         res.details.push({
           client: order.client,
           details: temp,

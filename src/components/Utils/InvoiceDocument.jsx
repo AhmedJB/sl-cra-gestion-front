@@ -51,10 +51,19 @@ const InvoiceDocument = ({ type, order, details, client, templateId }) => {
         }
     })();
 
+    const ROWS_PER_PAGE = 15;
     const rawDetails = details || [];
-    const normalizedData = (rawDetails.length > 0 && rawDetails[0].client)
+    let normalizedData = (rawDetails.length > 0 && rawDetails[0].client)
         ? rawDetails
         : [{ client: client || order?.client, details: rawDetails }];
+    if (normalizedData.length === 1 && normalizedData[0].details.length > ROWS_PER_PAGE) {
+        const flat = normalizedData[0].details;
+        const cli = normalizedData[0].client;
+        normalizedData = [];
+        for (let i = 0; i < flat.length; i += ROWS_PER_PAGE) {
+            normalizedData.push({ client: cli, details: flat.slice(i, i + ROWS_PER_PAGE) });
+        }
+    }
 
     return (
         <div id={templateId} className="invoice-container-root">

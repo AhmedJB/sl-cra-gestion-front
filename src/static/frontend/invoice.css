@@ -16,16 +16,26 @@
     color: #111;
     background: #fff;
     width: 210mm;
+    height: 297mm;
     min-height: 297mm;
-    margin: 0 auto;
+    margin: 0 auto 10mm auto;
     position: relative;
     box-sizing: border-box;
     flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    page-break-after: always;
+    break-after: page;
 }
 
 .invoice-sheet {
-    padding: 40px 50px 100px;
+    padding: 40px 50px 20px;
     box-sizing: border-box;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .inv-header-centered {
@@ -132,6 +142,7 @@
     border-collapse: collapse;
     font-size: 9pt;
     margin-top: 5px;
+    flex-shrink: 0;
 }
 
 .inv-table thead th {
@@ -197,10 +208,7 @@
 }
 
 .inv-footer {
-    position: absolute;
-    bottom: 30px;
-    left: 50px;
-    right: 50px;
+    margin-top: auto;
     text-align: center;
     padding-top: 10px;
     border-top: 2px solid var(--borderLight);
@@ -239,16 +247,24 @@
     }
     .invoice-container-root {
         padding: 0;
+        gap: 0;
     }
     .facture-reference {
         width: 210mm;
+        height: 297mm;
         min-height: 297mm;
-        margin: 0;
+        margin: 0 !important;
         box-shadow: none;
+        break-inside: avoid;
+        page-break-inside: avoid;
     }
     .invoice-container-root > .facture-reference:not(:last-child) {
         break-after: page;
         page-break-after: always;
+    }
+    .invoice-container-root > .facture-reference:last-child {
+        break-after: auto;
+        page-break-after: auto;
     }
 }
 
