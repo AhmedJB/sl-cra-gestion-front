@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { UserContext } from "../contexts/UserContext";
 import { DataContext } from "../contexts/DataContext";
-import { isLogged, req, download_file, logout, postReq } from "../helper";
+import { isLogged, req, download_file, logout, postReq, deleteReq } from "../helper";
 import { Redirect } from "react-router-dom";
 import { useToasts } from "react-toast-notifications";
 import AnimateNav from "./AnimateNav";
@@ -223,15 +223,21 @@ function Supplier(props) {
   }
 
   async function del(id) {
-    let resp = await req("modprovider/" + String(id) + "/");
     let fourn = Data.Suppliers.filter((e) => e.id == id)[0];
-    if (resp) {
-      addToast("Fournisseur " + fourn.name + " a ete supprime", {
+    let resp = await deleteReq("modprovider/" + String(id) + "/");
+    if (!resp) resp = await req("modprovider/" + String(id) + "/");
+    if (resp && (resp.id || resp.name || Object.keys(resp).length > 0 || resp === true)) {
+      addToast("Fournisseur " + (fourn ? fourn.name : id) + " a ete supprime", {
         appearance: "success",
         autoDismiss: true,
       });
       updateSuppliers();
       setConfirm(!ConfirmOpen);
+    } else {
+      addToast("Erreur lors de la suppression", {
+        appearance: "error",
+        autoDismiss: true,
+      });
     }
   }
 

@@ -18,6 +18,7 @@ import {
   post_download_file,
   logout,
   postReq,
+  deleteReq,
 } from "../helper";
 import styled from "styled-components";
 import Nav from "./Nav";
@@ -450,6 +451,7 @@ function Stock(props) {
   async function updateData() {
     let supResp = await req("provider/");
     let pResp = await req(`product/?page=${currentPage}&page_size=${pageSize}`);
+    let sResp = await req("silentpd/");
     let obj2 = { ...Data };
     obj2.Suppliers = supResp;
     if (pResp && pResp.results) {
@@ -457,17 +459,11 @@ function Stock(props) {
       setProduct(pResp.results);
       setPaginationData(pResp);
     }
-    setData(obj2);
-
-    // Background fetch for search data if not already present
-    if (!allProducts || allProducts.length === 0) {
-      req("silentpd/").then((silentResp) => {
-        if (silentResp) {
-          setAllProducts(silentResp);
-          setData((prev) => ({ ...prev, AllProducts: silentResp }));
-        }
-      });
+    if (sResp) {
+      setAllProducts(sResp);
+      obj2.AllProducts = sResp;
     }
+    setData(obj2);
     return true;
   }
 
@@ -790,15 +786,25 @@ function Stock(props) {
   }
 
   async function del(id) {
-    let resp = await req("modproduct/" + String(id) + "/");
-    let p = Products.filter((e) => e.product.p_id == id)[0];
-    if (resp) {
-      addToast("Produit " + p.product.name + " a ete supprime", {
+    let p = Products.filter((e) => e.product.p_id == id)[0] || allProducts.filter((e) => e.product.p_id == id)[0];
+    let resp = await deleteReq("modproduct/" + String(id) + "/");
+    if (!resp) resp = await req("modproduct/" + String(id) + "/");
+    if (resp && (resp.p_id || resp.id || resp.product || Object.keys(resp).length > 0 || resp === true)) {
+      addToast("Produit " + (p ? p.product.name : id) + " a ete supprime", {
         appearance: "success",
         autoDismiss: true,
       });
+      const filteredAll = allProducts.filter((e) => e.product.p_id != id);
+      setAllProducts(filteredAll);
+      setData((prev) => ({ ...prev, AllProducts: filteredAll }));
+      setProduct((prev) => prev.filter((e) => e.product.p_id != id));
       updateData();
       setConfirm(!ConfirmOpen);
+    } else {
+      addToast("Erreur lors de la suppression", {
+        appearance: "error",
+        autoDismiss: true,
+      });
     }
   }
 

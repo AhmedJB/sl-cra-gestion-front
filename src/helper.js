@@ -386,7 +386,6 @@ export async function deleteReq(url) {
   let options = {
     method: "delete",
     headers: headers,
-    mode: "cors",
   };
 
   try {
@@ -399,7 +398,12 @@ export async function deleteReq(url) {
         return true;
       }
     } else if (preResp.status === 401) {
-      return false;
+      let dec = await refreshToken();
+      if (dec) {
+        return deleteReq(url);
+      } else {
+        return false;
+      }
     } else {
       return false;
     }
