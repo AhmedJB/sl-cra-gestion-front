@@ -438,7 +438,7 @@ function HistoryV(props) {
       details: [],
     };
     console.log(order);
-    const ROWS_PER_PAGE = 15;
+    const ROWS_PER_PAGE = 14;
     for (let i = 0; i < order.details.length; i++) {
       if (i % ROWS_PER_PAGE == 0 && i != 0) {
         res.details.push({

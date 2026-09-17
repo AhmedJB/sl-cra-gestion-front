@@ -51,7 +51,7 @@ const InvoiceDocument = ({ type, order, details, client, templateId }) => {
         }
     })();
 
-    const ROWS_PER_PAGE = 15;
+    const ROWS_PER_PAGE = 14;
     const rawDetails = details || [];
     let normalizedData = (rawDetails.length > 0 && rawDetails[0].client)
         ? rawDetails
@@ -65,13 +65,18 @@ const InvoiceDocument = ({ type, order, details, client, templateId }) => {
         }
     }
 
+    const grandOrderTotal = normalizedData.reduce((sum, g) => {
+        const ls = Array.isArray(g.details) ? g.details : [];
+        return sum + ls.reduce((s, it) => s + Number(it.prix || 0) * Number(it.quantity || 0), 0);
+    }, 0);
+    const grandTaxTotal = round(grandOrderTotal * 0.2);
+    const grandGrandTotal = round(grandOrderTotal + grandTaxTotal);
+    const isLastPage = (idx) => idx === normalizedData.length - 1;
+
     return (
         <div id={templateId} className="invoice-container-root">
             {normalizedData.map((group, pageIdx) => {
                 const lines = Array.isArray(group.details) ? group.details : [];
-                const orderTotal = lines.reduce((s, item) => s + Number(item.prix || 0) * Number(item.quantity || 0), 0);
-                const taxTotal = round(orderTotal * 0.2);
-                const grandTotal = round(orderTotal + taxTotal);
 
                 return (
                     <div
@@ -146,29 +151,35 @@ const InvoiceDocument = ({ type, order, details, client, templateId }) => {
                                 </tbody>
                             </table>
 
-                            {showPrices && (
+                            {showPrices && isLastPage(pageIdx) && (
                                 <div className="inv-totals-block">
                                     {isBon ? (
                                         <div className="inv-total-final-bar">
                                             <span>TOTAL</span>
-                                            <span>{fmt(orderTotal)}</span>
+                                            <span>{fmt(grandOrderTotal)}</span>
                                         </div>
                                     ) : (
                                         <>
                                             <div className="inv-total-row">
                                                 <span className="inv-total-label">SOUS-TOTAL HT</span>
-                                                <span className="inv-total-value">{fmt(orderTotal)}</span>
+                                                <span className="inv-total-value">{fmt(grandOrderTotal)}</span>
                                             </div>
                                             <div className="inv-total-row">
                                                 <span className="inv-total-label">TVA TOTAL (20%)</span>
-                                                <span className="inv-total-value">{fmt(taxTotal)}</span>
+                                                <span className="inv-total-value">{fmt(grandTaxTotal)}</span>
                                             </div>
                                             <div className="inv-total-final-bar">
                                                 <span>TOTAL</span>
-                                                <span>{fmt(grandTotal)}</span>
+                                                <span>{fmt(grandGrandTotal)}</span>
                                             </div>
                                         </>
                                     )}
+                                </div>
+                            )}
+
+                            {normalizedData.length > 1 && (
+                                <div className="inv-pagination">
+                                    Page {pageIdx + 1} / {normalizedData.length}
                                 </div>
                             )}
 
