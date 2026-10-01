@@ -23,11 +23,33 @@ import {
   faEdit,
   faSave,
   faHashtag,
+  faCalendarAlt,
 } from "@fortawesome/free-solid-svg-icons";
 import { Preview } from "react-html2pdf";
 import { downloadInvoicePDF } from "../../utils/pdfGenerator";
 import InvoiceDocument from "../Utils/InvoiceDocument";
 import "../../static/frontend/invoice.css";
+
+// ─── Date helpers (invoice_date is ISO datetime, inputs are YYYY-MM-DD) ──
+const toDateInputValue = (iso) => {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+};
+const todayInputValue = () => toDateInputValue(new Date().toISOString());
+const fromDateInputValue = (yyyyMmDd) => {
+  if (!yyyyMmDd) return null;
+  // Send midday local to avoid TZ shifting the day on the backend
+  const d = new Date(`${yyyyMmDd}T12:00:00`);
+  if (isNaN(d.getTime())) return null;
+  return d.toISOString();
+};
+const getEffectiveDate = (inv) =>
+  inv?.invoice_date || inv?.effective_date || inv?.created_at || null;
 
 // ─── Styled Components ────────────────────────────────────────────────────────
 
@@ -611,12 +633,15 @@ function AccountingInvoices(props) {
   const [pdfInvoice, setPdfInvoice] = useState(null);
   const [previewInvoice, setPreviewInvoice] = useState(null);
   const [previewCustomRef, setPreviewCustomRef] = useState("");
+  const [previewInvoiceDate, setPreviewInvoiceDate] = useState("");
 
   // Custom Reference Edition
   const [refEditOpen, setRefEditOpen] = useState(false);
   const [refEditInvoice, setRefEditInvoice] = useState(null);
   const [customRefInput, setCustomRefInput] = useState("");
+  const [customRefDateInput, setCustomRefDateInput] = useState("");
   const [createCustomRef, setCreateCustomRef] = useState("");
+  const [createInvoiceDate, setCreateInvoiceDate] = useState(todayInputValue());
 
   const selectedYear = Data.SelectedFiscalYear;
 
@@ -646,6 +671,7 @@ function AccountingInvoices(props) {
     if (resp) {
       setPreviewInvoice(resp);
       setPreviewCustomRef(resp.custom_reference || resp.display_number || resp.invoice_number || "");
+      setPreviewInvoiceDate(toDateInputValue(getEffectiveDate(resp)));
     } else {
       addToast("Erreur lors de la récupération des données", { appearance: "error", autoDismiss: true });
     }
@@ -655,9 +681,14 @@ function AccountingInvoices(props) {
   const handleActualDownload = () => {
     if (previewInvoice) {
       // Use the previewCustomRef as the effective printed number; if empty fallback to system number
+      // Date edits apply to the live preview instantly; persist via Enregistrer (kept in previewInvoice too)
+      const dateIso = fromDateInputValue(previewInvoiceDate) || getEffectiveDate(previewInvoice);
       const effectiveInvoice = {
         ...previewInvoice,
+        invoice_date: dateIso,
+        effective_date: dateIso,
         _effective_number: previewCustomRef?.trim() || previewInvoice.display_number || previewInvoice.invoice_number || previewInvoice.id,
+        _effective_date: dateIso,
       };
       setPdfInvoice(effectiveInvoice);
       setPreviewInvoice(null);
@@ -667,17 +698,27 @@ function AccountingInvoices(props) {
   const handlePreviewSaveRef = async () => {
     if (!previewInvoice) return;
     const trimmed = previewCustomRef.trim();
-    // Save to backend so it persists
+    const dateIso = fromDateInputValue(previewInvoiceDate);
+    // Save to backend so it persists (both print fields, allowed even on locked years)
+    const payload = { custom_reference: trimmed };
+    if (dateIso) payload.invoice_date = dateIso;
     setLoading(true);
-    const resp = await patchReq(`accounting/invoices/${previewInvoice.id}/`, { custom_reference: trimmed });
+    const resp = await patchReq(`accounting/invoices/${previewInvoice.id}/`, payload);
     if (resp) {
-      addToast(trimmed ? "Référence enregistrée" : "Référence effacée (numéro système utilisé)", { appearance: "success", autoDismiss: true });
-      const updated = { ...previewInvoice, custom_reference: trimmed, display_number: trimmed || previewInvoice.invoice_number };
+      addToast("Référence et date enregistrées", { appearance: "success", autoDismiss: true });
+      const updated = {
+        ...previewInvoice,
+        custom_reference: resp.custom_reference ?? trimmed,
+        display_number: resp.display_number || (trimmed || previewInvoice.invoice_number),
+        invoice_date: resp.invoice_date || dateIso || previewInvoice.invoice_date,
+        effective_date: resp.effective_date || dateIso || previewInvoice.effective_date,
+      };
       setPreviewInvoice(updated);
+      setPreviewInvoiceDate(toDateInputValue(getEffectiveDate(updated)));
       // refresh list
       fetchInvoices();
       if (detailsInvoice && detailsInvoice.id === previewInvoice.id) {
-        setDetailsInvoice(updated);
+        setDetailsInvoice(resp);
       }
     } else {
       addToast("Erreur d'enregistrement", { appearance: "error", autoDismiss: true });
@@ -690,17 +731,19 @@ function AccountingInvoices(props) {
   };
 
   const openRefEditModal = async (inv) => {
-    // fetch fresh to get custom_reference
+    // fetch fresh to get custom_reference + invoice_date
     setLoading(true);
     const resp = await req(`accounting/invoices/${inv.id}/`);
     if (resp) {
       setRefEditInvoice(resp);
       setCustomRefInput(resp.custom_reference || "");
+      setCustomRefDateInput(toDateInputValue(getEffectiveDate(resp)));
       setRefEditOpen(true);
     } else {
       // fallback to list data
       setRefEditInvoice(inv);
       setCustomRefInput(inv.custom_reference || "");
+      setCustomRefDateInput(toDateInputValue(getEffectiveDate(inv)));
       setRefEditOpen(true);
     }
     setLoading(false);
@@ -709,10 +752,13 @@ function AccountingInvoices(props) {
   const handleSaveRefEdit = async () => {
     if (!refEditInvoice) return;
     const trimmed = customRefInput.trim();
+    const dateIso = fromDateInputValue(customRefDateInput);
+    const payload = { custom_reference: trimmed };
+    if (dateIso) payload.invoice_date = dateIso;
     setLoading(true);
-    const resp = await patchReq(`accounting/invoices/${refEditInvoice.id}/`, { custom_reference: trimmed });
+    const resp = await patchReq(`accounting/invoices/${refEditInvoice.id}/`, payload);
     if (resp) {
-      addToast(trimmed ? "Référence mise à jour" : "Référence personnalisée effacée", { appearance: "success", autoDismiss: true });
+      addToast("Référence et date mises à jour", { appearance: "success", autoDismiss: true });
       setRefEditOpen(false);
       setRefEditInvoice(null);
       fetchInvoices();
@@ -723,6 +769,7 @@ function AccountingInvoices(props) {
       if (previewInvoice && previewInvoice.id === refEditInvoice.id) {
         setPreviewInvoice(resp);
         setPreviewCustomRef(resp.custom_reference || resp.display_number || resp.invoice_number || "");
+        setPreviewInvoiceDate(toDateInputValue(getEffectiveDate(resp)));
       }
     } else {
       addToast("Erreur lors de la mise à jour", { appearance: "error", autoDismiss: true });
@@ -823,6 +870,7 @@ function AccountingInvoices(props) {
     setInvoiceType("ACHAT");
     setPaymentMode("CASH");
     setCreateCustomRef("");
+    setCreateInvoiceDate(todayInputValue());
     setItems([{ product_name: "", product_id: null, quantity: 1, unit_price: 0 }]);
   };
 
@@ -844,6 +892,7 @@ function AccountingInvoices(props) {
       return;
     }
 
+    const createDateIso = fromDateInputValue(createInvoiceDate);
     const payload = {
       fiscal_year_id: selectedYear.id,
       invoice_type: invoiceType,
@@ -852,6 +901,7 @@ function AccountingInvoices(props) {
       payment_mode: paymentMode,
       notes: notes,
       custom_reference: createCustomRef.trim(),
+      ...(createDateIso ? { invoice_date: createDateIso } : {}),
       items: items.map((item) => ({
         quantity: parseInt(item.quantity),
         unit_price: parseFloat(item.unit_price),
@@ -1014,6 +1064,15 @@ function AccountingInvoices(props) {
                 placeholder="Ex: FAC-2026-CUSTOM (vide = auto)"
                 value={createCustomRef}
                 onChange={(e) => setCreateCustomRef(e.target.value)}
+              />
+            </FormField>
+
+            <FormField>
+              <label>Date facture (imprimée)</label>
+              <Input
+                type="date"
+                value={createInvoiceDate}
+                onChange={(e) => setCreateInvoiceDate(e.target.value)}
               />
             </FormField>
 
@@ -1206,7 +1265,7 @@ function AccountingInvoices(props) {
                 </ModalTitle>
                 <ModalSubtitle>
                   N° {detailsInvoice.display_number || detailsInvoice.invoice_number || detailsInvoice.id} —{" "}
-                  {new Date(detailsInvoice.created_at).toLocaleDateString()}
+                  {new Date(getEffectiveDate(detailsInvoice)).toLocaleDateString()}
                   {detailsInvoice.custom_reference && detailsInvoice.custom_reference !== detailsInvoice.invoice_number && (
                     <span style={{ opacity: 0.5, fontSize: "0.85em", marginLeft: "8px" }}>(Système: {detailsInvoice.invoice_number})</span>
                   )}
@@ -1219,9 +1278,9 @@ function AccountingInvoices(props) {
                   setDetailsOpen(false);
                   openRefEditModal(detailsInvoice);
                 }}
-                title="Modifier la référence d'impression"
+                title="Modifier la référence et la date d'impression"
               >
-                <FontAwesomeIcon icon={faEdit} /> Référence
+                <FontAwesomeIcon icon={faEdit} /> Réf + date
               </Button>
             </ModalHeader>
 
@@ -1249,6 +1308,26 @@ function AccountingInvoices(props) {
                         }}
                       >
                         <FontAwesomeIcon icon={faEdit} />
+                      </Button>
+                    </div>
+                  </DetailItem>
+                  <DetailItem>
+                    <div className="label">Date facture (imprimée)</div>
+                    <div className="value" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      {new Date(getEffectiveDate(detailsInvoice)).toLocaleDateString()}
+                      <span style={{ fontSize: "0.7rem", opacity: 0.5, fontFamily: "monospace" }}>
+                        ({toDateInputValue(getEffectiveDate(detailsInvoice))})
+                      </span>
+                      <Button
+                        className="secondary"
+                        style={{ padding: "4px 8px", fontSize: "0.75rem" }}
+                        onClick={() => {
+                          setDetailsOpen(false);
+                          openRefEditModal(detailsInvoice);
+                        }}
+                        title="Modifier la date"
+                      >
+                        <FontAwesomeIcon icon={faCalendarAlt} />
                       </Button>
                     </div>
                   </DetailItem>
@@ -1445,7 +1524,7 @@ function AccountingInvoices(props) {
                             )}
                           </div>
                         </td>
-                        <td>{new Date(inv.created_at).toLocaleDateString()}</td>
+                        <td>{new Date(getEffectiveDate(inv)).toLocaleDateString()}</td>
                         <td>{inv.invoice_type}</td>
                         <td>{inv.invoice_type === "ACHAT" ? inv.provider_name : inv.client_name}</td>
                         <td style={{ fontWeight: "500" }}>
@@ -1532,55 +1611,84 @@ function AccountingInvoices(props) {
             </div>
           </div>
           {previewInvoice && (
-            <div style={{ padding: "16px 20px 0 20px", background: "rgba(255,255,255,0.02)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                <label style={{ fontSize: "0.75rem", color: "var(--text)", opacity: 0.7, textTransform: "uppercase", display: "flex", alignItems: "center", gap: "6px" }}>
-                  <FontAwesomeIcon icon={faHashtag} />
-                  Référence à imprimer (N° Facture)
-                </label>
-                <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                  <div style={{ flex: 1, position: "relative" }}>
+            <div style={{ padding: "16px 20px 16px 20px", background: "#ffffff", borderBottom: "1px solid #e2e8f0" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
+                  <div style={{ flex: "2 1 280px", display: "flex", flexDirection: "column", gap: "6px" }}>
+                    <label style={{ fontSize: "0.75rem", color: "#475569", fontWeight: 700, textTransform: "uppercase", display: "flex", alignItems: "center", gap: "6px" }}>
+                      <FontAwesomeIcon icon={faHashtag} />
+                      Référence à imprimer (N° Facture)
+                    </label>
+                    <div style={{ position: "relative" }}>
+                      <input
+                        type="text"
+                        placeholder={previewInvoice.invoice_number}
+                        value={previewCustomRef}
+                        onChange={(e) => setPreviewCustomRef(e.target.value)}
+                        style={{
+                          width: "100%",
+                          height: "42px",
+                          padding: "0 12px",
+                          borderRadius: "8px",
+                          border: previewCustomRef.trim() && previewCustomRef.trim() !== previewInvoice.invoice_number ? "1px solid #00B4D8" : "1px solid #cbd5e1",
+                          background: "#ffffff",
+                          color: "#1e293b",
+                          fontSize: "0.95rem",
+                          fontFamily: "monospace",
+                          outline: "none",
+                          boxSizing: "border-box",
+                        }}
+                      />
+                      {previewCustomRef.trim() && previewCustomRef.trim() !== previewInvoice.invoice_number && (
+                        <span style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", fontSize: "0.65rem", color: "#0369a1", background: "#e0f2fe", padding: "2px 6px", borderRadius: "4px", fontWeight: 700 }}>Custom</span>
+                      )}
+                    </div>
+                  </div>
+                  <div style={{ flex: "1 1 180px", display: "flex", flexDirection: "column", gap: "6px" }}>
+                    <label style={{ fontSize: "0.75rem", color: "#475569", fontWeight: 700, textTransform: "uppercase", display: "flex", alignItems: "center", gap: "6px" }}>
+                      <FontAwesomeIcon icon={faCalendarAlt} />
+                      Date facture (imprimée)
+                    </label>
                     <input
-                      type="text"
-                      className="field"
-                      placeholder={previewInvoice.invoice_number}
-                      value={previewCustomRef}
-                      onChange={(e) => setPreviewCustomRef(e.target.value)}
+                      type="date"
+                      value={previewInvoiceDate}
+                      onChange={(e) => setPreviewInvoiceDate(e.target.value)}
                       style={{
                         width: "100%",
                         height: "42px",
                         padding: "0 12px",
                         borderRadius: "8px",
-                        border: previewCustomRef.trim() && previewCustomRef.trim() !== previewInvoice.invoice_number ? "1px solid var(--second)" : "1px solid rgba(255,255,255,0.1)",
-                        background: "rgba(0,0,0,0.3)",
-                        color: "white",
+                        border: "1px solid #cbd5e1",
+                        background: "#ffffff",
+                        color: "#1e293b",
                         fontSize: "0.95rem",
-                        fontFamily: "monospace",
+                        outline: "none",
+                        boxSizing: "border-box",
                       }}
                     />
-                    {previewCustomRef.trim() && previewCustomRef.trim() !== previewInvoice.invoice_number && (
-                      <span style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", fontSize: "0.65rem", color: "var(--second)", background: "rgba(0,180,216,0.15)", padding: "2px 6px", borderRadius: "4px" }}>Custom</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "flex-end", gap: "8px" }}>
+                    <Button
+                      className="secondary"
+                      style={{ padding: "10px 14px", fontSize: "0.8rem", whiteSpace: "nowrap", height: "42px" }}
+                      onClick={handlePreviewSaveRef}
+                      disabled={loading}
+                      title="Enregistrer référence + date sur la facture (persistance)"
+                    >
+                      <FontAwesomeIcon icon={faSave} /> Enregistrer
+                    </Button>
+                    {(previewCustomRef.trim() !== (previewInvoice.custom_reference || "") ||
+                      previewInvoiceDate !== toDateInputValue(getEffectiveDate(previewInvoice))) && (
+                      <span style={{ fontSize: "0.7rem", color: "#d97706", whiteSpace: "nowrap", paddingBottom: "12px", fontWeight: 600 }}>Non enregistré</span>
                     )}
                   </div>
-                  <Button
-                    className="secondary"
-                    style={{ padding: "10px 14px", fontSize: "0.8rem", whiteSpace: "nowrap" }}
-                    onClick={handlePreviewSaveRef}
-                    disabled={loading}
-                    title="Enregistrer cette référence sur la facture (persistance)"
-                  >
-                    <FontAwesomeIcon icon={faSave} /> Enregistrer
-                  </Button>
-                  {previewCustomRef.trim() !== (previewInvoice.custom_reference || "") && (
-                    <span style={{ fontSize: "0.7rem", color: "orange", whiteSpace: "nowrap" }}>Non enregistré</span>
-                  )}
                 </div>
-                <div style={{ fontSize: "0.7rem", color: "var(--text)", opacity: 0.5, display: "flex", justifyContent: "space-between" }}>
-                  <span>Système: <span style={{ fontFamily: "monospace", color: "white" }}>{previewInvoice.invoice_number}</span></span>
+                <div style={{ fontSize: "0.75rem", color: "#64748b", display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
+                  <span>Système: <span style={{ fontFamily: "monospace", color: "#1e293b", fontWeight: 700 }}>{previewInvoice.invoice_number}</span> <span style={{ opacity: 0.7 }}>• {toDateInputValue(previewInvoice.created_at) || "—"}</span></span>
                   <span>{previewCustomRef.trim() ? (
-                    <span>Imprimera: <span style={{ fontFamily: "monospace", color: "var(--second)", fontWeight: "600" }}>{previewCustomRef.trim()}</span></span>
+                    <span>Imprimera: <span style={{ fontFamily: "monospace", color: "#0369a1", fontWeight: "700" }}>{previewCustomRef.trim()}</span> le {previewInvoiceDate || "—"}</span>
                   ) : (
-                    <span>Vide = utilise N° système</span>
+                    <span>Vide = utilise N° système • Date: {previewInvoiceDate || "—"}</span>
                   )}</span>
                 </div>
               </div>
@@ -1594,7 +1702,7 @@ function AccountingInvoices(props) {
                 order={{
                   o_id: previewCustomRef.trim() || previewInvoice.display_number || previewInvoice.invoice_number || previewInvoice.id,
                   invoice_id: previewCustomRef.trim() || previewInvoice.display_number || previewInvoice.invoice_number || previewInvoice.id,
-                  date: previewInvoice.created_at,
+                  date: fromDateInputValue(previewInvoiceDate) || getEffectiveDate(previewInvoice),
                   total: previewInvoice.total || 0,
                   client: previewInvoice.client_detail || null,
                 }}
@@ -1616,23 +1724,23 @@ function AccountingInvoices(props) {
         </div>
       </Modal>
 
-      {/* ═══ EDIT REFERENCE MODAL (Comptabilité only) ═══ */}
+      {/* ═══ EDIT REFERENCE + DATE MODAL (Comptabilité only) ═══ */}
       <Modal open={refEditOpen} closeFunction={() => { setRefEditOpen(false); setRefEditInvoice(null); }}>
         <ModalHeader>
           <ModalTitle>
             <span className="icon-wrapper">
               <FontAwesomeIcon icon={faHashtag} />
             </span>
-            Référence personnalisée
+            Référence + date (impression)
           </ModalTitle>
         </ModalHeader>
         {refEditInvoice && (
           <>
             <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: "10px", padding: "14px 16px", marginBottom: "16px", border: "1px solid rgba(255,255,255,0.06)" }}>
               <div style={{ fontSize: "0.75rem", opacity: 0.6, textTransform: "uppercase", marginBottom: "4px" }}>Facture système</div>
-              <div style={{ fontFamily: "monospace", color: "white", fontSize: "1rem" }}>{refEditInvoice.invoice_number}</div>
+              <div style={{ fontFamily: "monospace", color: "white", fontSize: "1rem" }}>{refEditInvoice.invoice_number} • {toDateInputValue(refEditInvoice.created_at) || "—"}</div>
               <div style={{ fontSize: "0.75rem", opacity: 0.5, marginTop: "4px" }}>
-                Tapez une référence différente à afficher/imprimer. Laissez vide pour revenir au numéro système.
+                Tapez une référence différente à afficher/imprimer. Laissez vide pour revenir au numéro système. La date est celle imprimée sur la facture.
               </div>
             </div>
             <FormSection>
@@ -1645,8 +1753,16 @@ function AccountingInvoices(props) {
                   style={{ fontFamily: "monospace" }}
                 />
               </FormField>
+              <FormField className="full">
+                <label>Date facture (imprimée)</label>
+                <Input
+                  type="date"
+                  value={customRefDateInput}
+                  onChange={(e) => setCustomRefDateInput(e.target.value)}
+                />
+              </FormField>
               <div style={{ fontSize: "0.75rem", opacity: 0.6, marginTop: "8px", display: "flex", justifyContent: "space-between" }}>
-                <span>Actuel: <span style={{ fontFamily: "monospace", color: customRefInput ? "var(--second)" : "white" }}>{customRefInput.trim() || refEditInvoice.invoice_number} </span>{customRefInput.trim() ? "(custom)" : "(système)"}</span>
+                <span>Actuel: <span style={{ fontFamily: "monospace", color: customRefInput ? "var(--second)" : "white" }}>{customRefInput.trim() || refEditInvoice.invoice_number} </span>{customRefInput.trim() ? "(custom)" : "(système)"} • {customRefDateInput || "—"}</span>
                 <span>{customRefInput.trim() ? <span style={{ color: "var(--second)" }}>Sera imprimé tel quel</span> : <span>Vide = système</span>}</span>
               </div>
             </FormSection>
@@ -1672,7 +1788,7 @@ function AccountingInvoices(props) {
               order={{
                 o_id: pdfInvoice._effective_number || pdfInvoice.display_number || pdfInvoice.invoice_number || pdfInvoice.id,
                 invoice_id: pdfInvoice._effective_number || pdfInvoice.display_number || pdfInvoice.invoice_number || pdfInvoice.id,
-                date: pdfInvoice.created_at,
+                date: pdfInvoice._effective_date || getEffectiveDate(pdfInvoice),
                 total: pdfInvoice.total || 0,
                 client: pdfInvoice.client_detail || null,
               }}
