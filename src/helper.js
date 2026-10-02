@@ -412,6 +412,70 @@ export async function deleteReq(url) {
   }
 }
 
+// Same `api` base as postReq/deleteReq, but returns { ok, status, data }
+// so callers can surface backend error messages (e.g. fiscal-year guards).
+export async function postWithError(url, body) {
+  url = formatUrl(url);
+  let access = sessionStorage.getItem("accessToken");
+  let headers = set_header(access);
+
+  let options = {
+    method: "post",
+    body: JSON.stringify(body),
+    headers: headers,
+  };
+
+  try {
+    let preResp = await fetch(api + url, options);
+    if (preResp.ok) {
+      let resp = await preResp.json().catch(() => ({}));
+      return { ok: true, status: preResp.status, data: resp };
+    } else if (preResp.status === 401) {
+      let dec = await refreshToken();
+      if (dec) {
+        return postWithError(url, body);
+      } else {
+        return { ok: false, status: 401, data: {} };
+      }
+    } else {
+      let data = await preResp.json().catch(() => ({}));
+      return { ok: false, status: preResp.status, data };
+    }
+  } catch (e) {
+    return { ok: false, status: 0, data: { error: String(e) } };
+  }
+}
+
+export async function deleteWithError(url) {
+  let access = sessionStorage.getItem("accessToken");
+  let headers = set_header(access);
+
+  let options = {
+    method: "delete",
+    headers: headers,
+  };
+
+  try {
+    let preResp = await fetch(api + url, options);
+    if (preResp.ok) {
+      let resp = await preResp.json().catch(() => ({}));
+      return { ok: true, status: preResp.status, data: resp };
+    } else if (preResp.status === 401) {
+      let dec = await refreshToken();
+      if (dec) {
+        return deleteWithError(url);
+      } else {
+        return { ok: false, status: 401, data: {} };
+      }
+    } else {
+      let data = await preResp.json().catch(() => ({}));
+      return { ok: false, status: preResp.status, data };
+    }
+  } catch (e) {
+    return { ok: false, status: 0, data: { error: String(e) } };
+  }
+}
+
 export async function isLogged() {
   let resp = await req("session/");
   return resp;

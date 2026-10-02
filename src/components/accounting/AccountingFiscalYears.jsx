@@ -5,7 +5,7 @@ import { Redirect } from "react-router-dom";
 import AnimateNav from "../AnimateNav";
 import styled from "styled-components";
 import Modal from "../Modal";
-import { req, postReq } from "../../helper";
+import { req, postReq, postWithError, deleteWithError } from "../../helper";
 import { useToasts } from "react-toast-notifications";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -112,42 +112,10 @@ function AccountingFiscalYears(props) {
     }
   }, []);
 
-  // helper to do POST with error details
-  const postWithError = async (url, body) => {
-    const access = sessionStorage.getItem("accessToken");
-    const headers = {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + access,
-    };
-    try {
-      const res = await fetch("http://127.0.0.1:8000/api/" + url, {
-        method: "post",
-        headers,
-        body: JSON.stringify(body),
-      });
-      const data = await res.json().catch(() => ({}));
-      return { ok: res.ok, status: res.status, data };
-    } catch (e) {
-      return { ok: false, status: 0, data: { error: String(e) } };
-    }
-  };
-  const deleteWithError = async (url) => {
-    const access = sessionStorage.getItem("accessToken");
-    const headers = {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + access,
-    };
-    try {
-      const res = await fetch("http://127.0.0.1:8000/api/" + url, {
-        method: "delete",
-        headers,
-      });
-      const data = await res.json().catch(() => ({}));
-      return { ok: res.ok, status: res.status, data };
-    } catch (e) {
-      return { ok: false, status: 0, data: { error: String(e) } };
-    }
-  };
+  // Shared helpers from ../../helper (same api base as req/postReq,
+  // with 401 refresh + { ok, status, data } so backend errors surface).
+  // Previously these were local fetch() calls hardcoded to
+  // http://127.0.0.1:8000/api/ — broken in production (gestionapp host).
 
   const handleCreateYear = async () => {
     const y = parseInt(newYear, 10);
