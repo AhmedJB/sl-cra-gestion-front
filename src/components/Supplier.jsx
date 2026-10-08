@@ -45,6 +45,7 @@ function Supplier(props) {
     email: "",
     phone: "",
     address: "",
+    ice: "",
     credit: "",
     id: null,
   });
@@ -179,12 +180,14 @@ function Supplier(props) {
     let email = document.getElementById("email").value;
     let phone = document.getElementById("phone").value;
     let address = document.getElementById("add").value;
+    let ice = document.getElementById("ice").value;
 
     let body = {
       name,
       email,
       phone,
       address,
+      ice,
     };
     let resp = await postReq("provider/", body);
     if (resp) {
@@ -262,6 +265,7 @@ function Supplier(props) {
     let email = document.getElementById("email_m").value;
     let phone = document.getElementById("phone_m").value;
     let address = document.getElementById("add_m").value;
+    let ice = document.getElementById("ice_m").value;
     let credit = document.getElementById("credit_m").value.split(" ")[0];
     let creditp = document.getElementById("credit_pm").value.split(" ")[0];
 
@@ -270,6 +274,7 @@ function Supplier(props) {
       email,
       phone,
       address,
+      ice,
       credit,
       creditp,
     };
@@ -312,6 +317,7 @@ function Supplier(props) {
               <th classname="task-title">Email</th>
               <th classname="status">Tel</th>
               <th className="address">Address</th>
+              <th className="ice">ICE</th>
               <th>Dette</th>
               <th classname="tel">Date</th>
               <th></th>
@@ -327,6 +333,7 @@ function Supplier(props) {
                     <td className="task-title">{e.email}</td>
                     <td className="status">{e.phone}</td>
                     <td className="address">{e.address}</td>
+                    <td className="ice">{e.ice || "—"}</td>
                     <td className="credit">{e.credit + " DH"}</td>
                     <td className="date">
                       {new Date(e.date).toLocaleDateString("fr-FR", options)}
@@ -406,6 +413,13 @@ function Supplier(props) {
             defaultValue={modifyData.address}
             id="add_m"
           ></input>
+          <label for="ice_m">ICE</label>
+          <input
+            type="text"
+            defaultValue={modifyData.ice || ""}
+            id="ice_m"
+            placeholder="Ex: 000010730000029"
+          ></input>
           <label for="add">Dette</label>
           <input
             type="text"
@@ -450,6 +464,8 @@ function Supplier(props) {
           <input type="text" id="phone"></input>
           <label for="add">Address</label>
           <input type="text" id="add"></input>
+          <label for="ice">ICE</label>
+          <input type="text" id="ice" placeholder="Ex: 000010730000029"></input>
 
           <button id="submit" onClick={createSupplier} disabled={loadingSubmit}>
             {loadingSubmit ? "Wait..." : "Creer"}

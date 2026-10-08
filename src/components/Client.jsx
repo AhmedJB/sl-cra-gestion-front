@@ -33,6 +33,7 @@ function Client(props) {
     email: "",
     phone: "",
     address: "",
+    ice: "",
     credit: "",
     id: null,
   });
@@ -110,12 +111,14 @@ function Client(props) {
     let email = document.getElementById("email").value;
     let phone = document.getElementById("phone").value;
     let address = document.getElementById("add").value;
+    let ice = document.getElementById("ice").value;
 
     let body = {
       name,
       email,
       phone,
       address,
+      ice,
     };
     let resp = await postReq("client/", body);
     if (resp) {
@@ -183,6 +186,7 @@ function Client(props) {
     let email = document.getElementById("email_m").value;
     let phone = document.getElementById("phone_m").value;
     let address = document.getElementById("add_m").value;
+    let ice = document.getElementById("ice_m").value;
     let credit = document.getElementById("credit_m").value.split(" ")[0];
     let creditp = document.getElementById("credit_pm").value.split(" ")[0];
 
@@ -191,6 +195,7 @@ function Client(props) {
       email,
       phone,
       address,
+      ice,
       credit,
       creditp,
     };
@@ -226,6 +231,7 @@ function Client(props) {
               <th className="task-title">Email</th>
               <th className="status">Tel</th>
               <th className="address">Address</th>
+              <th className="ice">ICE</th>
               <th>Credit</th>
               <th className="tel">Date</th>
               <th></th>
@@ -240,6 +246,7 @@ function Client(props) {
                     <td className="task-title">{e.email}</td>
                     <td className="status">{e.phone}</td>
                     <td className="address">{e.address}</td>
+                    <td className="ice">{e.ice || "—"}</td>
                     <td className="credit">{e.credit + " DH"}</td>
                     <td className="date">
                       {new Date(e.date).toLocaleDateString("fr-FR", options)}
@@ -316,6 +323,13 @@ function Client(props) {
             defaultValue={modifyData.address}
             id="add_m"
           ></input>
+          <label for="ice_m">ICE</label>
+          <input
+            type="text"
+            defaultValue={modifyData.ice || ""}
+            id="ice_m"
+            placeholder="Ex: 001534811000055"
+          ></input>
           <label for="add">Credit</label>
           <input
             type="text"
@@ -347,6 +361,8 @@ function Client(props) {
           <input type="text" id="phone"></input>
           <label for="add">Address</label>
           <input type="text" id="add"></input>
+          <label for="ice">ICE</label>
+          <input type="text" id="ice" placeholder="Ex: 001534811000055"></input>
 
           <button id="submit" onClick={createClient}>
             Creer

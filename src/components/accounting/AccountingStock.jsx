@@ -50,9 +50,9 @@ function AccountingStock(props) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Inline edit
+  // Inline edit (qty + supplier reference, compta-only)
   const [editingId, setEditingId] = useState(null);
-  const [editValues, setEditValues] = useState({ initial_qty: 0 });
+  const [editValues, setEditValues] = useState({ initial_qty: 0, product_reference: "" });
 
   const selectedYear = Data.SelectedFiscalYear;
 
@@ -83,17 +83,14 @@ function AccountingStock(props) {
       let resp = await req("silentpd/");
       if (resp && Array.isArray(resp)) {
         const flat = resp.map((p) => {
-          if (p.product) {
-            return {
-              id: p.product.id,
-              name: p.product.name + " (" + p.product.p_id + ")",
-            };
-          } else {
-            return {
-              id: p.id,
-              name: p.name + (p.p_id ? " (" + p.p_id + ")" : ""),
-            };
-          }
+          const prod = p.product || p;
+          const ref = prod.reference || "";
+          return {
+            id: prod.id,
+            name: prod.name + (prod.p_id ? " (" + prod.p_id + ")" : ""),
+            reference: ref,
+            display: (ref ? "[" + ref + "] " : "") + prod.name + (prod.p_id ? " (" + prod.p_id + ")" : ""),
+          };
         });
         setGlobalProducts(flat);
       }
@@ -145,7 +142,10 @@ function AccountingStock(props) {
   // ───── Inline Edit ─────
   const startEdit = (snap) => {
     setEditingId(snap.id);
-    setEditValues({ initial_qty: snap.initial_qty });
+    setEditValues({
+      initial_qty: snap.initial_qty,
+      product_reference: snap.product_reference || snap.product_detail?.reference || "",
+    });
   };
 
   const cancelEdit = () => setEditingId(null);
@@ -184,7 +184,7 @@ function AccountingStock(props) {
               <input
                 type="text"
                 className="field"
-                placeholder="Rechercher par nom ou ID..."
+                placeholder="Rechercher par réf, nom ou ID..."
                 value={searchQuery}
                 onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
                 style={{ width: "100%", maxWidth: "400px", marginBottom: "15px", textAlign: "center" }}
@@ -195,19 +195,21 @@ function AccountingStock(props) {
                   <thead style={{ position: "sticky", top: "-10px", backgroundColor: "#1e1e1e", zIndex: 1 }}>
                     <tr>
                       <th style={{ textAlign: "center", width: "50px" }}>✔</th>
+                      <th style={{ textAlign: "left", paddingLeft: "15px" }}>Réf</th>
                       <th style={{ textAlign: "left", paddingLeft: "15px" }}>Produit</th>
                       <th style={{ textAlign: "center", width: "150px" }}>Qté Initiale</th>
                     </tr>
                   </thead>
                   <tbody>
                     {(() => {
-                      const filtered = globalProducts.filter((p) => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
+                      const q = searchQuery.toLowerCase();
+                      const filtered = globalProducts.filter((p) => (p.display || p.name).toLowerCase().includes(q) || (p.reference || "").toLowerCase().includes(q));
                       const startIndex = (currentPage - 1) * itemsPerPage;
                       const paginated = filtered.slice(startIndex, startIndex + itemsPerPage);
                       const totalPages = Math.ceil(filtered.length / itemsPerPage);
 
                       if (filtered.length === 0) {
-                        return <tr><td colSpan="3" style={{ textAlign: "center", padding: "20px" }}>Aucun produit trouvé</td></tr>;
+                        return <tr><td colSpan="4" style={{ textAlign: "center", padding: "20px" }}>Aucun produit trouvé</td></tr>;
                       }
 
                       return (
@@ -224,6 +226,7 @@ function AccountingStock(props) {
                                     style={{ width: "18px", height: "18px", cursor: "pointer" }}
                                   />
                                 </td>
+                                <td style={{ textAlign: "left", paddingLeft: "15px", fontFamily: "monospace" }}>{product.reference || "—"}</td>
                                 <td style={{ textAlign: "left", paddingLeft: "15px" }}>{product.name}</td>
                                 <td style={{ textAlign: "center" }}>
                                   <input 
@@ -241,7 +244,7 @@ function AccountingStock(props) {
                           
                           {totalPages > 1 && (
                             <tr>
-                              <td colSpan="3">
+                              <td colSpan="4">
                                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 15px", borderTop: "1px solid rgba(255,255,255,0.1)", marginTop: "10px" }}>
                                   <button className="btn-main" style={{ padding: "5px 15px", width: "auto" }} disabled={currentPage === 1} onClick={() => setCurrentPage(c => c - 1)}>Précédent</button>
                                   <span style={{ fontSize: "0.9em", color: "var(--text)" }}>Page {currentPage} sur {totalPages}</span>
@@ -295,7 +298,10 @@ function AccountingStock(props) {
                 <table id="status-table">
                   <thead>
                     <tr>
+                      <th>Réf</th>
                       <th>Produit</th>
+                      <th>P. Achat TTC</th>
+                      <th>P. Vente TTC</th>
                       <th>Qté Initiale</th>
                       <th>Qté Courante</th>
                       <th>Actions</th>
@@ -303,9 +309,20 @@ function AccountingStock(props) {
                   </thead>
                   <tbody>
                     {snapshots && snapshots.length > 0 ? (
-                      snapshots.map((snap) => (
+                      snapshots.map((snap) => {
+                        const paTtc = snap.product_detail ? (Number(snap.product_detail.price_achat) || 0) * 1.2 : 0;
+                        const pvTtc = snap.product_detail ? (Number(snap.product_detail.price_vente) || 0) * 1.2 : 0;
+                        const ref = snap.product_reference || snap.product_detail?.reference || "";
+                        return (
                         <tr key={snap.id}>
+                          <td style={{ fontFamily: "monospace" }}>
+                            {editingId === snap.id ? (
+                              <input type="text" className="field" style={{ width: "110px", fontFamily: "monospace" }} placeholder="Ex: 1J0122291" value={editValues.product_reference} onChange={(e) => setEditValues({ ...editValues, product_reference: e.target.value })} />
+                            ) : (ref || "—")}
+                          </td>
                           <td>{snap.product_name || `Produit #${snap.product}`}</td>
+                          <td>{paTtc.toFixed(2)}</td>
+                          <td>{pvTtc.toFixed(2)}</td>
                           <td>
                             {editingId === snap.id ? (
                               <input type="number" className="field" style={{ width: "80px" }} value={editValues.initial_qty} onChange={(e) => setEditValues({ ...editValues, initial_qty: parseInt(e.target.value) || 0 })} />
@@ -327,10 +344,11 @@ function AccountingStock(props) {
                             )}
                           </td>
                         </tr>
-                      ))
+                        );
+                      })
                     ) : (
                       <tr>
-                        <td colSpan="4" className="text-center">Aucun produit — Utilisez "Importer Produits" pour commencer</td>
+                        <td colSpan="7" className="text-center">Aucun produit — Utilisez "Importer Produits" pour commencer</td>
                       </tr>
                     )}
                   </tbody>

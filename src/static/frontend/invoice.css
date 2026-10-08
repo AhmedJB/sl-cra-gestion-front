@@ -380,6 +380,207 @@
     border: 1px solid #e2e8f0;
 }
 
+/* ─── Bairh comptabilité invoice (inspired by supplier paper invoice) ─── */
+.bairh-sheet {
+    padding: 36px 46px 22px;
+}
+
+.bairh-title {
+    text-align: center;
+    margin-bottom: 26px;
+}
+
+.bairh-title h1 {
+    margin: 0 0 8px 0;
+    font-size: 23pt;
+    font-weight: 800;
+    letter-spacing: 3px;
+    color: #111;
+}
+
+.bairh-title-suffix {
+    font-size: 11pt;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.bairh-subtitle {
+    margin: 0;
+    font-size: 10pt;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: #333;
+}
+
+.bairh-client-box {
+    border: 1.5px solid #111;
+    padding: 14px 18px;
+    width: 62%;
+    min-height: 72px;
+    margin-bottom: 18px;
+    font-size: 10.5pt;
+    line-height: 1.7;
+    color: #111;
+}
+
+.bairh-client-box p {
+    margin: 4px 0;
+}
+
+.bairh-client-name {
+    font-weight: 700;
+    font-size: 12pt;
+    margin-bottom: 6px !important;
+}
+
+.bairh-ice {
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+/* Meta boxes: separated cards with air between them */
+.bairh-meta-bar {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 22px;
+    font-size: 10.5pt;
+}
+
+.bairh-meta-cell {
+    flex: 1;
+    display: flex;
+    gap: 12px;
+    align-items: baseline;
+    padding: 11px 16px;
+    border: 1.5px solid #111;
+}
+
+.bairh-meta-label {
+    font-weight: 700;
+    color: #111;
+    white-space: nowrap;
+}
+
+.bairh-meta-value {
+    font-weight: 700;
+    color: #111;
+}
+
+.bairh-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10.5pt;
+    border: 1.5px solid #111;
+}
+
+.bairh-table thead th {
+    background: #fff;
+    color: #111;
+    border: 1px solid #111;
+    padding: 12px 12px;
+    font-weight: 700;
+    text-align: center;
+    font-size: 10.5pt;
+    letter-spacing: 0.5px;
+}
+
+.bairh-table tbody td {
+    border: 1px solid #111;
+    padding: 11px 12px;
+    text-align: center;
+    font-size: 10.5pt;
+    color: #111;
+}
+
+.bairh-th-ref { width: 16%; }
+.bairh-th-des { width: 36%; }
+.bairh-td-ref {
+    font-family: monospace;
+    font-weight: 600;
+    text-align: left !important;
+}
+.bairh-td-des { text-align: left !important; }
+.bairh-td-total { font-weight: 700; }
+
+/* Totals: single airy one-line bar (Total H.T. | T.V.A | Total T.T.C) */
+.bairh-totals {
+    width: 100%;
+    margin-top: 24px;
+    border-collapse: collapse;
+    border: 1.5px solid #111;
+    font-size: 11pt;
+}
+
+.bairh-totals td {
+    border: 1px solid #111;
+    padding: 13px 14px;
+    text-align: center;
+    color: #111;
+    white-space: nowrap;
+}
+
+.bairh-tot-label {
+    font-weight: 600;
+}
+
+.bairh-tot-val {
+    font-weight: 600;
+    min-width: 110px;
+}
+
+.bairh-totals .bairh-grand {
+    font-weight: 800;
+    font-size: 13pt;
+    background: #f4f4f4;
+    min-width: 130px;
+}
+
+.bairh-words {
+    margin-top: 36px;
+    font-size: 10.5pt;
+    line-height: 1.8;
+    color: #111;
+}
+
+.bairh-words p {
+    margin: 5px 0;
+}
+
+.bairh-words-amount {
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #111;
+    padding-bottom: 14px;
+}
+
+.bairh-note {
+    margin-top: 22px;
+    font-size: 9.5pt;
+    color: #555;
+}
+
+.bairh-footer {
+    margin-top: auto;
+    text-align: center;
+    padding-top: 18px;
+    border-top: 2px solid #111;
+}
+
+.bairh-footer p {
+    margin: 5px 0;
+    font-size: 9pt;
+    line-height: 1.6;
+    color: #111;
+}
+
+.bairh-footer-addr {
+    display: inline-block;
+    border: 1.5px solid #111;
+    padding: 6px 20px;
+    font-weight: 600;
+    margin-bottom: 8px !important;
+}
+
 @media (max-width: 768px) {
     .preview-modal-container {
         width: 100vw;

@@ -4,7 +4,7 @@ import { DataContext } from "../../contexts/DataContext";
 import { Redirect } from "react-router-dom";
 import AnimateNav from "../AnimateNav";
 import styled from "styled-components";
-import { req, postReq, patchReq } from "../../helper";
+import { req, postReq, patchReq, postWithError } from "../../helper";
 import Modal from "../Modal";
 import CustomSelect from "../CustomSelect";
 import { useToasts } from "react-toast-notifications";
@@ -587,7 +587,7 @@ const ItemHeader = styled.div`
 
 const ItemGrid = styled.div`
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-columns: 0.9fr 1.8fr 0.7fr 0.9fr 0.7fr;
   gap: 12px;
 
   @media (max-width: 768px) {
@@ -612,7 +612,7 @@ function AccountingInvoices(props) {
   const [paymentMode, setPaymentMode] = useState("CASH");
   const [notes, setNotes] = useState("");
   const [items, setItems] = useState([
-    { product_name: "", product_id: null, quantity: 1, unit_price: 0 },
+    { reference: "", product_name: "", product_id: null, quantity: 1, unit_price: 0, discount: 0 },
   ]);
 
   const [snapshotProducts, setSnapshotProducts] = useState([]);
@@ -797,6 +797,7 @@ function AccountingInvoices(props) {
         resp.map((s) => ({
           id: s.product,
           name: s.product_name || `Produit #${s.product}`,
+          reference: s.product_reference || s.product_detail?.reference || "",
         }))
       );
     }
@@ -828,7 +829,7 @@ function AccountingInvoices(props) {
   // ─── Invoice Creation ────────────────────────────────────────────────────
 
   const handleAddItem = () => {
-    setItems([...items, { product_name: "", product_id: null, quantity: 1, unit_price: 0 }]);
+    setItems([...items, { reference: "", product_name: "", product_id: null, quantity: 1, unit_price: 0, discount: 0 }]);
   };
 
   const handleRemoveItem = (index) => {
@@ -850,17 +851,23 @@ function AccountingInvoices(props) {
     if (vs.length > 0) {
       updated[index].product_id = vs[0].id;
       updated[index].product_name = vs[0].name;
+      // Auto-fill supplier reference from compta stock (editable afterwards)
+      if (vs[0].reference && !updated[index].reference) {
+        updated[index].reference = vs[0].reference;
+      }
     } else {
       updated[index].product_id = null;
     }
     setItems(updated);
   };
 
+  // Prices entered in compta are TTC with per-line remise (Total TTC = Σ qty × prix TTC × (1 - remise/100))
   const getItemsTotal = () => {
     return items.reduce((sum, item) => {
       const qty = parseInt(item.quantity) || 0;
       const price = parseFloat(item.unit_price) || 0;
-      return sum + qty * price;
+      const disc = Math.max(0, Math.min(100, parseFloat(item.discount) || 0));
+      return sum + qty * price * (1 - disc / 100);
     }, 0);
   };
 
@@ -871,13 +878,20 @@ function AccountingInvoices(props) {
     setPaymentMode("CASH");
     setCreateCustomRef("");
     setCreateInvoiceDate(todayInputValue());
-    setItems([{ product_name: "", product_id: null, quantity: 1, unit_price: 0 }]);
+    setItems([{ reference: "", product_name: "", product_id: null, quantity: 1, unit_price: 0, discount: 0 }]);
   };
 
   const handleCreateSubmit = async () => {
     if (!selectedYear) {
       addToast("Veuillez d'abord sélectionner une année fiscale sur le Dashboard", {
         appearance: "warning",
+        autoDismiss: true,
+      });
+      return;
+    }
+    if (selectedYear.is_locked) {
+      addToast(`Année ${selectedYear.year} clôturée — création impossible. Rouvrez-la (Années Fiscales) ou sélectionnez une année ouverte.`, {
+        appearance: "error",
         autoDismiss: true,
       });
       return;
@@ -897,27 +911,38 @@ function AccountingInvoices(props) {
       fiscal_year_id: selectedYear.id,
       invoice_type: invoiceType,
       provider_id: invoiceType === "ACHAT" ? partner : null,
-      client_id: invoiceType === "VENTE" ? partner : null,
+      client_id: invoiceType !== "ACHAT" ? partner : null, // VENTE + AVOIR go to the client
       payment_mode: paymentMode,
       notes: notes,
       custom_reference: createCustomRef.trim(),
       ...(createDateIso ? { invoice_date: createDateIso } : {}),
       items: items.map((item) => ({
         quantity: parseInt(item.quantity),
-        unit_price: parseFloat(item.unit_price),
+        unit_price_ttc: parseFloat(item.unit_price),
+        discount: Math.max(0, Math.min(100, parseFloat(item.discount) || 0)),
+        reference: (item.reference || "").trim(),
         ...(item.product_id ? { product_id: item.product_id } : { product_name: item.product_name }),
       })),
     };
 
     setLoading(true);
-    const resp = await postReq("accounting/invoices/", payload);
-    if (resp) {
+    const r = await postWithError("accounting/invoices/", payload);
+    if (r.ok) {
       addToast("Facture créée avec succès", { appearance: "success", autoDismiss: true });
       fetchInvoices();
       setCreateOpen(false);
       resetCreateForm();
     } else {
-      addToast("Erreur de création", { appearance: "error", autoDismiss: true });
+      // Surface the real backend reason (locked year, missing partner, bad qty…) instead of a generic error
+      const d = r.data || {};
+      const msg =
+        d.error ||
+        (d.non_field_errors && d.non_field_errors.join(" ")) ||
+        (typeof d === "object"
+          ? Object.entries(d).map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(" ") : v}`).join(" ")
+          : "") ||
+        "Erreur de création";
+      addToast(msg, { appearance: "error", autoDismiss: true });
     }
     setLoading(false);
   };
@@ -971,6 +996,7 @@ function AccountingInvoices(props) {
   const invoiceTypes = [
     { value: "ACHAT", name: "Achat" },
     { value: "VENTE", name: "Vente" },
+    { value: "AVOIR", name: "Avoir" },
   ];
 
   const paymentModes = [
@@ -1087,12 +1113,12 @@ function AccountingInvoices(props) {
           </FormGrid>
         </FormSection>
 
-        {/* ITEMS */}
+        {/* ITEMS — Réf / Nom / Prix TTC / Qté / Total TTC */}
         <FormSection>
           <SectionTitle>
             Articles ({items.length})
             <span style={{ marginLeft: "auto" }}>
-              {getItemsTotal().toFixed(2)} DH
+              Total TTC {getItemsTotal().toFixed(2)} DH
             </span>
           </SectionTitle>
 
@@ -1100,12 +1126,24 @@ function AccountingInvoices(props) {
             <ItemCard key={index}>
               <ItemHeader>
                 <span>Article #{index + 1}</span>
+                <span style={{ fontSize: "0.75rem", opacity: 0.6 }}>
+                  Total TTC {((parseInt(item.quantity) || 0) * (parseFloat(item.unit_price) || 0) * (1 - (Math.max(0, Math.min(100, parseFloat(item.discount) || 0))) / 100)).toFixed(2)} DH
+                </span>
                 <DeleteButton onClick={() => handleRemoveItem(index)}>
                   <FontAwesomeIcon icon={faTrashAlt} />
                 </DeleteButton>
               </ItemHeader>
 
               <ItemGrid>
+                <FormField>
+                  <label>Référence</label>
+                  <Input
+                    placeholder="Ex: 1J0122291"
+                    value={item.reference}
+                    onChange={(e) => handleItemChange(index, "reference", e.target.value)}
+                    style={{ fontFamily: "monospace" }}
+                  />
+                </FormField>
                 <FormField>
                   <label>Produit</label>
                   <SelectWrapper>
@@ -1133,12 +1171,25 @@ function AccountingInvoices(props) {
                 </FormField>
 
                 <FormField>
-                  <label>Prix Unitaire (DH)</label>
+                  <label>Prix TTC (DH)</label>
                   <Input
                     type="number"
                     placeholder="Ex: 100.00"
                     value={item.unit_price}
                     onChange={(e) => handleItemChange(index, "unit_price", e.target.value)}
+                  />
+                </FormField>
+
+                <FormField>
+                  <label>Remise (%)</label>
+                  <Input
+                    type="number"
+                    placeholder="Ex: 35"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    value={item.discount}
+                    onChange={(e) => handleItemChange(index, "discount", e.target.value)}
                   />
                 </FormField>
               </ItemGrid>
@@ -1334,7 +1385,7 @@ function AccountingInvoices(props) {
                   <DetailItem>
                     <div className="label">Type</div>
                     <div className="value">
-                      {detailsInvoice.invoice_type === "ACHAT" ? "Achat" : "Vente"}
+                      {detailsInvoice.invoice_type === "ACHAT" ? "Achat" : detailsInvoice.invoice_type === "AVOIR" ? "Avoir" : "Vente"}
                     </div>
                   </DetailItem>
                   <DetailItem>
@@ -1346,6 +1397,15 @@ function AccountingInvoices(props) {
                         ? detailsInvoice.provider_detail?.name || "Fournisseur"
                         : detailsInvoice.client_detail?.name || "Client"}
                     </div>
+                    {((detailsInvoice.invoice_type === "ACHAT"
+                      ? detailsInvoice.provider_detail?.ice
+                      : detailsInvoice.client_detail?.ice)) && (
+                      <div className="value" style={{ fontSize: "0.8rem", opacity: 0.7, fontFamily: "monospace", marginTop: "4px" }}>
+                        ICE: {detailsInvoice.invoice_type === "ACHAT"
+                          ? detailsInvoice.provider_detail?.ice
+                          : detailsInvoice.client_detail?.ice}
+                      </div>
+                    )}
                   </DetailItem>
                 </DetailsColumn>
                 <DetailsColumn>
@@ -1388,25 +1448,33 @@ function AccountingInvoices(props) {
               <table>
                 <thead>
                   <tr>
+                    <th>Réf</th>
                     <th>Désignation</th>
                     <th>Quantité</th>
-                    <th>Prix Unitaire</th>
-                    <th>Total</th>
+                    <th>Prix TTC</th>
+                    <th>R. (%)</th>
+                    <th>Total TTC</th>
                   </tr>
                 </thead>
                 <tbody>
                   {detailsInvoice.items?.length > 0 ? (
-                    detailsInvoice.items.map((item) => (
+                    detailsInvoice.items.map((item) => {
+                      const puTtc = item.effective_unit_ttc ?? item.unit_price_ttc ?? (item.unit_price || 0) * 1.2;
+                      const totTtc = item.effective_total_ttc ?? item.total ?? 0;
+                      return (
                       <tr key={item.id}>
+                        <td style={{ fontFamily: "monospace" }}>{item.reference || "—"}</td>
                         <td>{item.product_name}</td>
                         <td>{item.quantity}</td>
-                        <td>{(item.unit_price || 0).toFixed(2)} DH</td>
-                        <td style={{ fontWeight: "500" }}>{(item.total || 0).toFixed(2)} DH</td>
+                        <td>{(puTtc || 0).toFixed(2)} DH</td>
+                        <td>{item.discount ? Number(item.discount).toFixed(2) : "—"}</td>
+                        <td style={{ fontWeight: "500" }}>{(totTtc || 0).toFixed(2)} DH</td>
                       </tr>
-                    ))
+                      );
+                    })
                   ) : (
                     <tr>
-                      <td colSpan="4" style={{ textAlign: "center", opacity: 0.5 }}>
+                      <td colSpan="6" style={{ textAlign: "center", opacity: 0.5 }}>
                         Aucun article trouvé
                       </td>
                     </tr>
@@ -1475,6 +1543,18 @@ function AccountingInvoices(props) {
             </Card>
           </div>
         )}
+        {selectedYear?.is_locked && (
+          <div className="row">
+            <Card width="90%" height="auto">
+              <WarningBox>
+                <FontAwesomeIcon icon={faFileInvoice} size="lg" />
+                Année {selectedYear.year} <strong>clôturée</strong> — création de factures impossible. Rouvrez-la
+                via <strong>Années Fiscales</strong> ou sélectionnez une année ouverte (seules réf/date
+                d'impression restent modifiables).
+              </WarningBox>
+            </Card>
+          </div>
+        )}
 
         <div className="row">
           <Card width="90%" height="auto" minHeight="500px">
@@ -1489,7 +1569,12 @@ function AccountingInvoices(props) {
                 )}
               </h3>
               <div className="inline">
-                <Button className="primary" onClick={() => setCreateOpen(true)} disabled={!selectedYear}>
+                <Button
+                  className="primary"
+                  onClick={() => setCreateOpen(true)}
+                  disabled={!selectedYear || selectedYear.is_locked}
+                  title={selectedYear?.is_locked ? `Année ${selectedYear.year} clôturée — création impossible` : "Nouvelle facture"}
+                >
                   <FontAwesomeIcon icon={faPlus} />
                   Nouvelle Facture
                 </Button>
@@ -1697,6 +1782,8 @@ function AccountingInvoices(props) {
           <div className="preview-body">
             {previewInvoice && (
               <InvoiceDocument
+                variant="bairh"
+                bairhKind={previewInvoice.invoice_type}
                 type={previewInvoice.invoice_type === "ACHAT" ? "facture" : "facture"}
                 templateId="invoice-preview"
                 order={{
@@ -1708,9 +1795,13 @@ function AccountingInvoices(props) {
                 }}
                 details={
                   previewInvoice.items?.map((item) => ({
+                    reference: item.reference || "",
                     product_name: item.product_name,
                     quantity: item.quantity,
-                    prix: item.unit_price,
+                    unit_price_ttc: item.effective_unit_ttc ?? item.unit_price_ttc ?? item.unit_price,
+                    discount: item.discount || 0,
+                    effective_total_ttc: item.effective_total_ttc ?? item.total,
+                    prix: item.effective_unit_ttc ?? item.unit_price_ttc ?? item.unit_price,
                   })) || []
                 }
                 client={
@@ -1783,6 +1874,8 @@ function AccountingInvoices(props) {
         <div style={{ position: "absolute", left: "-9999px", top: "-9999px" }}>
           <Preview id="accounting-pdf-template">
             <InvoiceDocument
+              variant="bairh"
+              bairhKind={pdfInvoice.invoice_type}
               type={pdfInvoice.invoice_type === "ACHAT" ? "facture" : "facture"}
               templateId="accounting-pdf-template"
               order={{
@@ -1794,9 +1887,13 @@ function AccountingInvoices(props) {
               }}
               details={
                 pdfInvoice.items?.map((item) => ({
+                  reference: item.reference || "",
                   product_name: item.product_name,
                   quantity: item.quantity,
-                  prix: item.unit_price,
+                  unit_price_ttc: item.effective_unit_ttc ?? item.unit_price_ttc ?? item.unit_price,
+                  discount: item.discount || 0,
+                  effective_total_ttc: item.effective_total_ttc ?? item.total,
+                  prix: item.effective_unit_ttc ?? item.unit_price_ttc ?? item.unit_price,
                 })) || []
               }
               client={
